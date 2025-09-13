@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import threading
+from bson.objectid import ObjectId
 
 def make_wire(name, timer_set=0):
     """
@@ -12,12 +13,13 @@ def make_wire(name, timer_set=0):
         "complete": False,
         "timer_set": timer_set,
         "start_time": None,
-        "timer_expired": False
+        "timer_expired": False,
+        "verified_by": None # New field to track who verified the task
     }
 
-def add_bomb_to_db(collection, name, exploding, wires, bomb_timer_set):
+def add_bomb_to_db(collection, name, exploding, wires, bomb_timer_set, user_id, user_name):
     """
-    Adds a bomb to the database, starting its timer and each wire's timer.
+    Adds a bomb to the database, associating it with a user.
     """
     # Ensure wire timers are less than bomb timer
     for wire in wires:
@@ -33,69 +35,58 @@ def add_bomb_to_db(collection, name, exploding, wires, bomb_timer_set):
         "exploding": exploding,
         "wires": wires,
         "timer_set": bomb_timer_set,
-        "start_time": datetime.utcnow()
+        "start_time": datetime.utcnow(),
+        "user_id": user_id  # Add the user_id field here
     }
     
     try:
         result = collection.insert_one(bomb_document)
-        print(f"Successfully inserted bomb with ID: {result.inserted_id}")
+        print(f"Successfully inserted bomb '{name}' (ID: {result.inserted_id}) for user '{user_name}' (ID: {user_id}).")
     except Exception as e:
         print(f"An error occurred while inserting: {e}")
 
-def complete_wire_task(collection, bomb_name, wire_name):
-    """
-    Updates a single wire's 'complete' attribute to True.
-    """
-    try:
-        query = {"name": bomb_name, "wires.name": wire_name}
-        update_operation = {"$set": {"wires.$.complete": True}}
-        result = collection.update_one(query, update_operation)
-        
-        if result.matched_count > 0:
-            print(f"Successfully marked wire '{wire_name}' for bomb '{bomb_name}' as complete.")
-        else:
-            print(f"No bomb found with name '{bomb_name}' or wire '{wire_name}'.")
-    except Exception as e:
-        print(f"An error occurred while updating: {e}")
-
-# Revised function to listen for wire timer endings
-def listen_for_wire_timer_end(collection, bomb_name, wire_name):
+def listen_for_wire_timer_end(collection, bomb_name, user_id, users_collection):
     """
     Callback function that runs when a wire timer expires.
     It marks the wire's timer_expired attribute to True only if the wire is not already complete.
     """
-    print(f"\n--- Timer expired for wire '{wire_name}' of bomb '{bomb_name}'. ---")
+    owner_doc = users_collection.find_one({"_id": ObjectId(user_id)})
+    owner_name = owner_doc.get("username", "Unknown User")
+    
+    print(f"\n--- Timer expired for wire on bomb '{bomb_name}'. Owner: '{owner_name}' (ID: {user_id}). ---")
     try:
         # First, check the current state of the wire
-        bomb = collection.find_one({"name": bomb_name, "wires.name": wire_name})
+        bomb = collection.find_one({"name": bomb_name, "user_id": user_id})
         if bomb:
-            # Find the specific wire document
-            wire_doc = next((w for w in bomb["wires"] if w["name"] == wire_name), None)
-            if wire_doc and not wire_doc["complete"]:
-                # If the wire is not complete, update its 'timer_expired' status
-                query = {"name": bomb_name, "wires.name": wire_name}
-                update_operation = {"$set": {"wires.$.timer_expired": True}}
-                result = collection.update_one(query, update_operation)
-                
-                if result.matched_count > 0:
-                    print(f"Successfully marked wire '{wire_name}' for bomb '{bomb_name}' as having an expired timer.")
+            is_incomplete = any(not wire['complete'] for wire in bomb.get("wires", []))
+            if is_incomplete:
+                print(f"Bomb '{bomb_name}' has incomplete wires. Exploding! 💥")
+                update_operation = {"$set": {"exploding": True}}
+                collection.update_one({"_id": bomb.get("_id")}, update_operation)
+                print(f"Bomb '{bomb_name}' (ID: {bomb.get('_id')}) has been set to exploding: True.")
             else:
-                print(f"Wire '{wire_name}' for bomb '{bomb_name}' was already complete. No update needed.")
+                print(f"All wires for bomb '{bomb_name}' (ID: {bomb.get('_id')}) are complete. The bomb is disarmed. ✨")
+
     except Exception as e:
         print(f"An error occurred while updating wire timer status: {e}")
 
-# Listener for a new bomb insertion
-def listen_for_new_bombs(collection):
+def listen_for_new_bombs(collection, users_collection):
     print("Listening for new bombs...")
     try:
         with collection.watch([{"$match": {"operationType": "insert"}}]) as stream:
             for change in stream:
                 bomb_document = change["fullDocument"]
                 bomb_name = bomb_document.get("name")
+                user_id = bomb_document.get("user_id")
+
+                owner_doc = users_collection.find_one({"_id": ObjectId(user_id)})
+                owner_name = owner_doc.get("username", "Unknown User")
+
+                print(f"\n--- New bomb detected: '{bomb_name}' for user '{owner_name}' (ID: {user_id}). ---")
                 
                 # Schedule bomb timer
                 bomb_timer_set = bomb_document.get("timer_set")
-                threading.Timer(bomb_timer_set, complete_bomb_timer, args=[collection, bomb_name]).start()
+                threading.Timer(bomb_timer_set, complete_bomb_timer, args=[collection, bomb_name, user_id, users_collection]).start()
                 
                 # Schedule individual wire timers
                 for wire in bomb_document.get("wires", []):
@@ -104,33 +95,80 @@ def listen_for_new_bombs(collection):
                     
                     if wire_name and wire_timer_set is not None:
                         print(f"Scheduling timer for wire '{wire_name}' on bomb '{bomb_name}'. Duration: {wire_timer_set}s.")
-                        threading.Timer(wire_timer_set, listen_for_wire_timer_end, args=[collection, bomb_name, wire_name]).start()
+                        threading.Timer(wire_timer_set, listen_for_wire_timer_end, args=[collection, bomb_name, user_id, users_collection]).start()
 
     except Exception as e:
         print(f"Error in Change Stream listener: {e}")
 
-# Revised callback function to check wire status and explode if incomplete
-def complete_bomb_timer(collection, bomb_name):
+def complete_bomb_timer(collection, bomb_name, user_id, users_collection):
     """
     Callback function that runs when a bomb's timer expires.
     It checks if any wires are incomplete or have expired timers and explodes the bomb if so.
     """
-    print(f"\n--- Bomb timer expired for '{bomb_name}'. Checking wire status... ---")
+    owner_doc = users_collection.find_one({"_id": ObjectId(user_id)})
+    owner_name = owner_doc.get("username", "Unknown User")
+    
+    print(f"\n--- Bomb timer expired for '{bomb_name}' (Owner: '{owner_name}', ID: {user_id}). Checking wire status... ---")
     
     # Retrieve the bomb document to check wire completion status
-    bomb = collection.find_one({"name": bomb_name})
+    bomb = collection.find_one({"name": bomb_name, "user_id": user_id})
     if not bomb:
-        print(f"Bomb '{bomb_name}' not found.")
+        print(f"Bomb '{bomb_name}' not found for user '{owner_name}' (ID: {user_id}).")
         return
 
-    # A bomb explodes if any wire is *not* complete OR if a wire's timer has expired
     is_incomplete = any(not wire['complete'] for wire in bomb.get("wires", []))
     is_expired = any(wire['timer_expired'] for wire in bomb.get("wires", []))
 
     if is_incomplete or is_expired:
-        print(f"Bomb '{bomb_name}' has incomplete or expired wires. Exploding! 💥")
+        print(f"Bomb '{bomb_name}' (ID: {bomb.get('_id')}) has incomplete or expired wires. Exploding! 💥")
         update_operation = {"$set": {"exploding": True}}
-        collection.update_one({"name": bomb_name}, update_operation)
-        print(f"Bomb '{bomb_name}' has been set to exploding: True.")
+        collection.update_one({"_id": bomb.get("_id")}, update_operation)
+        print(f"Bomb '{bomb_name}' (ID: {bomb.get('_id')}) has been set to exploding: True.")
     else:
-        print(f"All wires for bomb '{bomb_name}' are complete and their timers were disarmed. The bomb is disarmed. ✨")
+        print(f"All wires for bomb '{bomb_name}' (ID: {bomb.get('_id')}) are complete and their timers were disarmed. The bomb is disarmed. ✨")
+
+def verify_wire_task(collection, bomb_name, wire_name, owner_user_id, verifier_user_id, users_collection):
+    """
+    Allows a user to verify a wire task for a friend.
+    """
+    try:
+        owner_obj_id = ObjectId(owner_user_id)
+        verifier_obj_id = ObjectId(verifier_user_id)
+
+        owner_doc = users_collection.find_one({"_id": owner_obj_id})
+        verifier_doc = users_collection.find_one({"_id": verifier_obj_id})
+        owner_name = owner_doc.get("username", "Unknown User")
+        verifier_name = verifier_doc.get("username", "Unknown User")
+
+        # 1. Check if the verifier is a friend of the owner
+        if not owner_doc or verifier_obj_id not in owner_doc.get("friends", []):
+            print(f"❌ Verification failed: User '{verifier_name}' (ID: {verifier_user_id}) is not a friend of '{owner_name}' (ID: {owner_user_id}).")
+            return False
+
+        # 2. Find the specific wire in the bomb
+        query = {"name": bomb_name, "user_id": owner_user_id, "wires.name": wire_name}
+        bomb_doc = collection.find_one(query)
+        if not bomb_doc:
+            print(f"❌ Verification failed: Bomb '{bomb_name}' or wire '{wire_name}' not found for user '{owner_name}' (ID: {owner_user_id}).")
+            return False
+
+        # 3. Check if the wire is already complete or verified
+        wire_doc = next((w for w in bomb_doc.get("wires", []) if w["name"] == wire_name), None)
+        if wire_doc and wire_doc["complete"]:
+            print(f"❌ Verification failed: Wire '{wire_name}' on bomb '{bomb_name}' is already complete. It was verified by '{wire_doc.get('verified_by', 'Unknown')}'")
+            return False
+
+        # 4. Update the wire to be complete and add the verifier's ID
+        update_operation = {"$set": {"wires.$.complete": True, "wires.$.verified_by": verifier_user_id}}
+        result = collection.update_one(query, update_operation)
+        
+        if result.matched_count > 0:
+            print(f"✅ Wire '{wire_name}' on bomb '{bomb_name}' (ID: {bomb_doc.get('_id')}) successfully verified by friend '{verifier_name}' (ID: {verifier_user_id}).")
+            return True
+        else:
+            print(f"❌ Verification failed: No document was modified. Bomb: '{bomb_name}' (ID: {bomb_doc.get('_id')}).")
+            return False
+
+    except Exception as e:
+        print(f"An error occurred during verification: {e}")
+        return False
