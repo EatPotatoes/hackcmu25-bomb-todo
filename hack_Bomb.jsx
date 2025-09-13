@@ -162,18 +162,22 @@ function LoginPage({ nav, onLogin }) {
         flexDirection: "column",
         justifyContent: "center",
         gap: "0.75rem",
+        width: "100%",
       },
       input: {
         width: "100%",
+        maxWidth: "100%",
         border: "1px solid #4b5563",
         borderRadius: "0.5rem",
         padding: "0.75rem",
         backgroundColor: "#374151",
         color: "#ffffff",
         fontSize: "1rem",
+        boxSizing: "border-box",
       },
       button: {
         width: "100%",
+        maxWidth: "100%",
         backgroundColor: "#ffffff",
         color: "#000000",
         borderRadius: "0.5rem",
@@ -182,6 +186,7 @@ function LoginPage({ nav, onLogin }) {
         cursor: "pointer",
         fontWeight: "600",
         fontSize: "1rem",
+        boxSizing: "border-box",
         flexDirection: "column",
         justifyContent: "center",
       },
@@ -286,18 +291,22 @@ function SignupPage({ nav, onSignup }) {
       flexDirection: "column",
       justifyContent: "center",
       gap: "0.75rem",
+      width: "100%",
     },
     input: {
       width: "100%",
+      maxWidth: "100%",
       border: "1px solid #4b5563",
       borderRadius: "0.5rem",
       padding: "0.75rem",
       backgroundColor: "#374151",
       color: "#ffffff",
       fontSize: "1rem",
+      boxSizing: "border-box",
     },
     button: {
       width: "100%",
+      maxWidth: "100%",
       backgroundColor: "#ffffff",
       color: "#000000",
       borderRadius: "0.5rem",
@@ -306,6 +315,7 @@ function SignupPage({ nav, onSignup }) {
       cursor: "pointer",
       fontWeight: "600",
       fontSize: "1rem",
+      boxSizing: "border-box",
       flexDirection: "column",
       justifyContent: "center",
     },
@@ -1339,14 +1349,13 @@ export default function App() {
         {/* footer */}
         <footer style={styles.footer}>
           <div style={styles.footerContent}>
-            <div style={styles.footerTitle}>Next steps</div>
-            <ul style={styles.footerList}>
-              <li>Replace mock auth with Firebase/Supabase; protect routes on server too.</li>
-              <li>Send email invites to verifiers; verification dashboard w/ Approve/Reject.</li>
-              <li>Server‑enforced timers (Cloud Functions / cron) to trigger punishments.</li>
-              <li>Stripe SetupIntent to hold penalty; capture on failure; add non‑monetary options.</li>
-              <li>Persist tasks, punishments, friendships in database; attach to bombs.</li>
-            </ul>
+            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "1rem"}}>
+              "We aim to attract striving users who seek to improve themselves through our site. Most notably college students who tend to forget and give no second thought to the importance of deadlines. With our site, every task on the user's to-do list becomes an urgent priority. There's absolutely no leeway."
+            </div>
+            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "0.5rem"}}>Authors</div>
+            <div style={{textAlign: "center", fontSize: "0.875rem", color: "#9ca3af"}}>
+              Mario B, Adrian M, Albert Z, Gary G
+            </div>
           </div>
         </footer>
       </div>
