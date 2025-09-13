@@ -343,6 +343,7 @@ function SignupPage({ nav, onSignup }) {
 function HomeBombPage({ bomb, setBomb, nav }) {
   const { label } = useCountdown(bomb.deadline);
   const wiresCut = bomb.wires.filter(w=>w.cut).length;
+  const [hoveredWire, setHoveredWire] = useState(null);
   
   const styles = {
     container: {
@@ -385,50 +386,145 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     },
     bombContainer: {
       position: "relative",
-      width: "20rem",
-      height: "20rem",
+      width: "100%",
+      height: "24rem",
       margin: "2rem auto",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
     },
     bomb: {
-      position: "absolute",
-      inset: "0",
-      borderRadius: "50%",
-      backgroundColor: "#374151",
-      color: "#ffffff",
-      display: "grid",
-      placeItems: "center",
-      fontSize: "3rem",
-      fontWeight: "bold",
-      border: "3px solid #4b5563",
+      position: "relative",
+      width: "40rem",
+      height: "20rem",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "flex-start",
     },
-    wireButton: {
+    timer: {
+      position: "relative",
+      width: "32rem",
+      height: "4rem",
+      backgroundColor: "#6b7280",
+      borderRadius: "1rem",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
+      border: "3px solid #4b5563",
+      background: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
+      marginBottom: "0",
+    },
+    timerDisplay: {
+      fontFamily: "monospace",
+      fontSize: "2rem",
+      fontWeight: "bold",
+      color: "#dc2626",
+      textShadow: "0 0 8px rgba(220, 38, 38, 0.8), 0 0 16px rgba(220, 38, 38, 0.4)",
+      letterSpacing: "0.15rem",
+    },
+    wiresAndSticksContainer: {
+      position: "relative",
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      gap: "1.5rem",
+      marginTop: "0",
+    },
+    wireStickPair: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "0",
+    },
+    wire: {
+      width: "16px",
+      height: "10rem",
+      borderRadius: "8px",
+      boxShadow: "0 3px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      background: "linear-gradient(90deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
+      position: "relative",
+      marginTop: "-2px", // Negative margin to make wire touch timer
+    },
+    wireHover: {
+      transform: "scale(1.1)",
+      filter: "brightness(1.2)",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+    },
+    wireCut: {
+      opacity: "0.2",
+      transform: "scale(0.7) rotate(15deg)",
+      filter: "blur(1px) grayscale(0.5)",
+      cursor: "not-allowed",
+    },
+    stick: {
+      width: "4rem",
+      height: "6rem",
+      backgroundColor: "#dc2626",
+      borderRadius: "0.5rem",
+      position: "relative",
+      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
+      background: "linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)",
+      marginTop: "-2px", // Negative margin to make stick touch wire
+    },
+    stickBand: {
       position: "absolute",
+      top: "1rem",
+      left: "-0.25rem",
+      right: "-0.25rem",
+      height: "0.5rem",
+      backgroundColor: "#1f2937",
+      borderRadius: "0.25rem",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+    },
+    stickBand2: {
+      position: "absolute",
+      top: "4.5rem",
+      left: "-0.25rem",
+      right: "-0.25rem",
+      height: "0.5rem",
+      backgroundColor: "#1f2937",
+      borderRadius: "0.25rem",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+    },
+    tooltip: {
+      position: "absolute",
+      bottom: "100%",
       left: "50%",
       transform: "translateX(-50%)",
-      padding: "0.5rem 1rem",
-      borderRadius: "9999px",
-      border: "2px solid #6b7280",
-      backgroundColor: "#374151",
+      backgroundColor: "#1f2937",
       color: "#ffffff",
+      padding: "0.5rem 1rem",
+      borderRadius: "0.5rem",
       fontSize: "0.875rem",
       fontWeight: "600",
-      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
-      cursor: "pointer",
-      transition: "all 0.2s",
+      whiteSpace: "nowrap",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
+      border: "1px solid #374151",
+      marginBottom: "0.5rem",
+      zIndex: 10,
+      pointerEvents: "none",
     },
-    wireButtonHover: {
-      transform: "translateX(-50%) scale(1.05)",
-    },
-    wireButtonCut: {
-      textDecoration: "line-through",
-      opacity: "0.6",
-      backgroundColor: "#6b7280",
+    tooltipArrow: {
+      position: "absolute",
+      top: "100%",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: 0,
+      height: 0,
+      borderLeft: "6px solid transparent",
+      borderRight: "6px solid transparent",
+      borderTop: "6px solid #1f2937",
     },
     wiresCount: {
-      fontSize: "1rem",
+      fontSize: "1.125rem",
       color: "#9ca3af",
       textAlign: "center",
-      marginTop: "1rem",
+      marginTop: "2rem",
+      fontWeight: "500",
     },
     sidebar: {
       display: "flex",
@@ -490,28 +586,58 @@ function HomeBombPage({ bomb, setBomb, nav }) {
             <span style={styles.countdown}>⏳ {label}</span>
           </div>
           <div style={styles.bombContainer}>
-            <div style={styles.bomb}>💥</div>
-            {bomb.wires.map((w,i)=> (
-              <button 
-                key={w.id} 
-                onClick={()=>setBomb(prev=>({...prev, wires: prev.wires.map(x=>x.id===w.id?{...x, cut:!x.cut}:x)}))} 
-                style={{
-                  ...styles.wireButton,
-                  top: 18 + i*40,
-                  ...(w.cut ? styles.wireButtonCut : {}),
-                }}
-                onMouseEnter={(e) => {
-                  if (!w.cut) {
-                    e.target.style.transform = "translateX(-50%) scale(1.05)";
+            <div style={styles.bomb}>
+              {/* Wide Timer */}
+              <div style={styles.timer}>
+                <div style={styles.timerDisplay}>
+                  {label.includes('h') ? 
+                    label.split(' ').slice(1, 3).join(' ').replace(/[dhms]/g, '') : 
+                    "00:00"
                   }
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = "translateX(-50%) scale(1)";
-                }}
-              >
-                {w.cut?"Cut":"Wire"} {i+1}
-              </button>
-            ))}
+                </div>
+              </div>
+              
+              {/* Wires and Dynamite Sticks */}
+              <div style={styles.wiresAndSticksContainer}>
+                {bomb.wires.map((wire, index) => (
+                  <div key={wire.id} style={styles.wireStickPair}>
+                    {/* Wire */}
+                    <div 
+                      style={{
+                        ...styles.wire,
+                        backgroundColor: wire.color,
+                        ...(wire.cut ? styles.wireCut : {}),
+                        ...(hoveredWire === wire.id && !wire.cut ? styles.wireHover : {}),
+                      }}
+                      onClick={() => {
+                        if (!wire.cut) {
+                          setBomb(prev => ({
+                            ...prev, 
+                            wires: prev.wires.map(x => x.id === wire.id ? {...x, cut: !x.cut} : x)
+                          }));
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredWire(wire.id)}
+                      onMouseLeave={() => setHoveredWire(null)}
+                    >
+                      {/* Tooltip */}
+                      {hoveredWire === wire.id && !wire.cut && (
+                        <div style={styles.tooltip}>
+                          Cut: {wire.task}
+                          <div style={styles.tooltipArrow}></div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Dynamite Stick */}
+                    <div style={styles.stick}>
+                      <div style={styles.stickBand}></div>
+                      <div style={styles.stickBand2}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div style={styles.wiresCount}>Wires cut: {wiresCut}/{bomb.wires.length}</div>
         </div>
@@ -527,7 +653,9 @@ function HomeBombPage({ bomb, setBomb, nav }) {
                       backgroundColor: w.color,
                     }}
                   ></span> 
-                  <span>{w.task}</span>
+                  <span style={w.cut ? {textDecoration: 'line-through', opacity: 0.6} : {}}>
+                    {w.task}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -551,10 +679,12 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     </div>
   );
 }
-
-function TasksPage({ tasks, setTasks }) {
+function TasksPage({ tasks, setTasks, bomb, setBomb }) {
   const [t, setT] = useState("");
   const [due, setDue] = useState("");
+  
+  // Array of colors to cycle through for new wires
+  const wireColors = ["#ef4444", "#22c55e", "#3b82f6", "#eab308", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
   
   const styles = {
     container: {
@@ -656,6 +786,50 @@ function TasksPage({ tasks, setTasks }) {
     },
   };
 
+  const handleAddTask = () => {
+    if (!t) return;
+    
+    // Create new task
+    const newTask = { 
+      id: crypto.randomUUID(), 
+      title: t, 
+      due: due || null, 
+      done: false 
+    };
+    
+    // Create new wire for the bomb
+    const newWire = {
+      id: crypto.randomUUID(),
+      task: t,
+      color: wireColors[bomb.wires.length % wireColors.length], // Cycle through colors
+      cut: false
+    };
+    
+    // Add task to tasks list
+    setTasks(prev => [...prev, newTask]);
+    
+    // Add wire to bomb
+    setBomb(prev => ({
+      ...prev,
+      wires: [...prev.wires, newWire]
+    }));
+    
+    // Clear form
+    setT("");
+    setDue("");
+  };
+
+  const handleDeleteTask = (taskId, taskTitle) => {
+    // Remove task from tasks list
+    setTasks(prev => prev.filter(x => x.id !== taskId));
+    
+    // Remove corresponding wire from bomb
+    setBomb(prev => ({
+      ...prev,
+      wires: prev.wires.filter(w => w.task !== taskTitle)
+    }));
+  };
+
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Tasks</h2>
@@ -674,12 +848,7 @@ function TasksPage({ tasks, setTasks }) {
         />
         <button 
           style={styles.addButton} 
-          onClick={()=>{ 
-            if(!t) return; 
-            setTasks(prev=>[...prev,{ id:crypto.randomUUID(), title:t, due:due||null, done:false }]); 
-            setT(""); 
-            setDue(""); 
-          }}
+          onClick={handleAddTask}
         >
           Add Task
         </button>
@@ -707,7 +876,7 @@ function TasksPage({ tasks, setTasks }) {
               </button>
               <button 
                 style={styles.actionButton} 
-                onClick={()=>setTasks(prev=>prev.filter(x=>x.id!==task.id))}
+                onClick={() => handleDeleteTask(task.id, task.title)}
               >
                 Delete
               </button>
@@ -1051,13 +1220,13 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [friends, setFriends] = useState([{ name:"alex", email:"alex@cmu.edu" }, { name:"riley", email:"riley@cmu.edu" }]);
   const [stats, setStats] = useState({ defused: 2, exploded: 1 });
-
   const [bomb, setBomb] = useState(()=>({
-    deadline: Date.now() + 1000*60*60*6 + 1000*10, // ~6h 10s
+    deadline: Date.now() + 1000*60*60 + 1000*10, // ~6h 10s
     wires: [
       { id:"w1", task:"Do dishes", color:"#ef4444", cut:false },
       { id:"w2", task:"Finish essay", color:"#22c55e", cut:false },
       { id:"w3", task:"Gym 45m", color:"#3b82f6", cut:false },
+      { id:"w4", task:"Call mom", color:"#eab308", cut:false },
     ],
   }));
 
@@ -1122,7 +1291,7 @@ export default function App() {
         {route===routes.login && <LoginPage nav={nav} onLogin={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
         {route===routes.signup && <SignupPage nav={nav} onSignup={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
         {isLogged && route===routes.home && <HomeBombPage bomb={bomb} setBomb={setBomb} nav={nav} />}
-        {isLogged && route===routes.tasks && <TasksPage tasks={tasks} setTasks={setTasks} />}
+        {isLogged && route===routes.tasks && <TasksPage tasks={tasks} setTasks={setTasks} bomb={bomb} setBomb={setBomb} />}
         {isLogged && route===routes.punishments && <PunishmentsPage punishments={punishments} setPunishments={setPunishments} />}
         {isLogged && route===routes.profile && (
           <ProfilePage user={user} stats={stats} friends={friends} setFriends={setFriends} onLogout={()=>setIsLogged(false)} />
