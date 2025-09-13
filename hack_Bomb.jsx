@@ -162,22 +162,18 @@ function LoginPage({ nav, onLogin }) {
         flexDirection: "column",
         justifyContent: "center",
         gap: "0.75rem",
-        width: "100%",
       },
       input: {
         width: "100%",
-        maxWidth: "100%",
         border: "1px solid #4b5563",
         borderRadius: "0.5rem",
         padding: "0.75rem",
         backgroundColor: "#374151",
         color: "#ffffff",
         fontSize: "1rem",
-        boxSizing: "border-box",
       },
       button: {
         width: "100%",
-        maxWidth: "100%",
         backgroundColor: "#ffffff",
         color: "#000000",
         borderRadius: "0.5rem",
@@ -186,7 +182,6 @@ function LoginPage({ nav, onLogin }) {
         cursor: "pointer",
         fontWeight: "600",
         fontSize: "1rem",
-        boxSizing: "border-box",
         flexDirection: "column",
         justifyContent: "center",
       },
@@ -291,22 +286,18 @@ function SignupPage({ nav, onSignup }) {
       flexDirection: "column",
       justifyContent: "center",
       gap: "0.75rem",
-      width: "100%",
     },
     input: {
       width: "100%",
-      maxWidth: "100%",
       border: "1px solid #4b5563",
       borderRadius: "0.5rem",
       padding: "0.75rem",
       backgroundColor: "#374151",
       color: "#ffffff",
       fontSize: "1rem",
-      boxSizing: "border-box",
     },
     button: {
       width: "100%",
-      maxWidth: "100%",
       backgroundColor: "#ffffff",
       color: "#000000",
       borderRadius: "0.5rem",
@@ -315,7 +306,6 @@ function SignupPage({ nav, onSignup }) {
       cursor: "pointer",
       fontWeight: "600",
       fontSize: "1rem",
-      boxSizing: "border-box",
       flexDirection: "column",
       justifyContent: "center",
     },
@@ -436,7 +426,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     bombContainer: {
       position: "relative",
       width: "100%",
-      height: "24rem",
+      height: "30rem",
       margin: "2rem auto",
       display: "flex",
       justifyContent: "center",
@@ -445,7 +435,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     bomb: {
       position: "relative",
       width: "40rem",
-      height: "20rem",
+      height: "26rem",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -489,14 +479,14 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     },
     wire: {
       width: "16px",
-      height: "10rem",
+      height: "8rem",
       borderRadius: "8px",
       boxShadow: "0 3px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
       cursor: "pointer",
       transition: "all 0.3s ease",
       background: "linear-gradient(90deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
       position: "relative",
-      marginTop: "-2px", // Negative margin to make wire touch timer
+      marginTop: "-2px",
     },
     wireHover: {
       transform: "scale(1.1)",
@@ -510,34 +500,34 @@ function HomeBombPage({ bomb, setBomb, nav }) {
       cursor: "not-allowed",
     },
     stick: {
-      width: "4rem",
-      height: "6rem",
+      width: "7rem",
+      height: "12rem",
       backgroundColor: "#dc2626",
-      borderRadius: "0.5rem",
+      borderRadius: "1rem",
       position: "relative",
-      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
+      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 3px 0 rgba(255, 255, 255, 0.2)",
       background: "linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)",
-      marginTop: "-2px", // Negative margin to make stick touch wire
+      marginTop: "-2px",
     },
     stickBand: {
       position: "absolute",
-      top: "1rem",
-      left: "-0.25rem",
-      right: "-0.25rem",
-      height: "0.5rem",
+      top: "2rem",
+      left: "-0.75rem",
+      right: "-0.75rem",
+      height: "1.25rem",
       backgroundColor: "#1f2937",
-      borderRadius: "0.25rem",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+      borderRadius: "0.75rem",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
     },
     stickBand2: {
       position: "absolute",
-      top: "4.5rem",
-      left: "-0.25rem",
-      right: "-0.25rem",
-      height: "0.5rem",
+      top: "8.75rem",
+      left: "-0.75rem",
+      right: "-0.75rem",
+      height: "1.25rem",
       backgroundColor: "#1f2937",
-      borderRadius: "0.25rem",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+      borderRadius: "0.75rem",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
     },
     tooltip: {
       position: "absolute",
@@ -678,7 +668,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
                       )}
                     </div>
                     
-                    {/* Dynamite Stick */}
+                    {/* Large Dynamite Stick */}
                     <div style={styles.stick}>
                       <div style={styles.stickBand}></div>
                       <div style={styles.stickBand2}></div>
@@ -728,6 +718,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     </div>
   );
 }
+
 function TasksPage({ tasks, setTasks, bomb, setBomb }) {
   const [t, setT] = useState("");
   const [due, setDue] = useState("");
@@ -1349,13 +1340,14 @@ export default function App() {
         {/* footer */}
         <footer style={styles.footer}>
           <div style={styles.footerContent}>
-            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "1rem"}}>
-              "We aim to attract striving users who seek to improve themselves through our site. Most notably college students who tend to forget and give no second thought to the importance of deadlines. With our site, every task on the user's to-do list becomes an urgent priority. There's absolutely no leeway."
-            </div>
-            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "0.5rem"}}>Authors</div>
-            <div style={{textAlign: "center", fontSize: "0.875rem", color: "#9ca3af"}}>
-              Mario B, Adrian M, Albert Z, Gary G
-            </div>
+            <div style={styles.footerTitle}>Next steps</div>
+            <ul style={styles.footerList}>
+              <li>Replace mock auth with Firebase/Supabase; protect routes on server too.</li>
+              <li>Send email invites to verifiers; verification dashboard w/ Approve/Reject.</li>
+              <li>Server‑enforced timers (Cloud Functions / cron) to trigger punishments.</li>
+              <li>Stripe SetupIntent to hold penalty; capture on failure; add non‑monetary options.</li>
+              <li>Persist tasks, punishments, friendships in database; attach to bombs.</li>
+            </ul>
           </div>
         </footer>
       </div>
