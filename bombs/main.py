@@ -1,7 +1,7 @@
 # main.py
 
 from database_connection import get_database_connection, clear_collection
-from bomb_operations import add_bomb_to_db, listen_for_new_bombs, make_wire
+from bomb_operations import add_bomb_to_db, listen_for_new_bombs, make_wire, complete_wire_task
 import time
 import threading
 
@@ -25,18 +25,24 @@ if __name__ == "__main__":
         
         # Example 1: Add a bomb with multiple wires and a timer
         wires_bomb_1 = [wire1, wire2]
-        add_bomb_to_db(bombs_collection, "cs major", False, wires_bomb_1, 10) # Bomb timer is 10s
+        add_bomb_to_db(bombs_collection, "cs_major", False, wires_bomb_1, 10) # Bomb timer is 10s
 
-        # Keep the main thread alive to allow the listeners to run
-        print("\n--- Main thread will now sleep for 12 seconds to observe all timers. ---")
-        time.sleep(12)
+        wire3 = make_wire("long_wire", timer_set=15)
+        wires_bomb_2 = [wire3]
+        add_bomb_to_db(bombs_collection, "math_major", True, wires_bomb_2, 15) # Bomb timer is 15s
+
+        complete_wire_task(bombs_collection, "cs_major", "short_wire")
+        complete_wire_task(bombs_collection, "cs_major", "medium_wire")
         
-        print("\n--- All scheduled timers should have completed. ---")
-        
+        print("Keeping thread alive")
+        input()
+
         # Verify the final state
         print("\n--- Final state of bombs ---")
         for bomb in bombs_collection.find():
-            print(bomb)
+            print(f"Bomb: {bomb['name']}, Exploding: {bomb['exploding']}, Timer Set: {bomb['timer_set']}")
+            for wire in bomb.get("wires", []):
+                print(f"  Wire: {wire['name']}, Complete: {wire['complete']}, Timer Expired: {wire['timer_expired']}")
 
         # Close the connection
         client.close()
