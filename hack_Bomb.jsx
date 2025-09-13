@@ -50,22 +50,59 @@ function AppNav({ nav, route }) {
     { id: routes.punishments, label: "Punishments" },
     { id: routes.profile, label: "Profile" },
   ];
+
   return (
-    <div className="sticky top-0 bg-white/80 backdrop-blur border-b">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">💣</span>
-          <span className="font-bold">To‑Do Or Die</span>
-        </div>
-        <div className="flex gap-1">
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => nav(t.id)} className={`px-3 py-2 rounded-xl text-sm border hover:bg-gray-50 ${route===t.id?"bg-gray-900 text-white border-gray-900":""}`}>{t.label}</button>
-          ))}
-        </div>
+    <div
+      style={{
+        position: "sticky",
+        top: 0,
+        background: "rgba(255,255,255,0.8)",
+        backdropFilter: "blur(4px)",
+        borderBottom: "1px solid #ddd",
+        padding: "1rem",
+      }}
+    >
+      {/* Profile icon top-left */}
+      <div style={{ display: "flex", justifyContent: "flex-start" }}>
+        <span style={{ fontSize: "2rem" }}>👤</span>
+      </div>
+
+      {/* Huge centered title */}
+      <h1
+        style={{
+          fontSize: "4rem",
+          fontWeight: "bold",
+          textAlign: "center",
+          margin: "12px 0",
+          transform: "translate(70%, 0%)",
+        }}
+      >
+        To-Do Or Die
+      </h1>
+
+      {/* Nav buttons aligned right */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => nav(t.id)}
+            style={{
+              padding: "0.5rem 1rem",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              background: route === t.id ? "#111" : "#fff",
+              color: route === t.id ? "#fff" : "#000",
+              cursor: "pointer",
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
     </div>
   );
 }
+
 
 // ---------- Pages ----------
 function LoginPage({ nav, onLogin }) {
@@ -110,7 +147,13 @@ function HomeBombPage({ bomb, setBomb, nav }) {
   const { label } = useCountdown(bomb.deadline);
   const wiresCut = bomb.wires.filter(w=>w.cut).length;
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div
+  style={{
+    width: "100%",           // fill the whole viewport width
+    padding: "16px 16px 8px" // similar spacing
+  }}
+>
+
       <div className="grid md:grid-cols-3 gap-6">
         <div className="md:col-span-2 p-6 rounded-2xl border bg-white">
           <div className="flex items-center justify-between">
