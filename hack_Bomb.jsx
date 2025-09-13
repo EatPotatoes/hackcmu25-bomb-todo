@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 
 // ------------------------------------------------------------------
 // To‑Do Or Die — 6‑page hackathon demo (single‑file React)
@@ -33,13 +34,36 @@ function useHashRoute(defaultRoute = routes.home) {
   return { route, nav };
 }
 
+// cookie utilities
+function setCookie(name, value, days) {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
+
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
 // countdown hook
 function useCountdown(untilTs) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const ms = Math.max(0, untilTs - now);
   const s = Math.floor(ms/1000) % 60; const m = Math.floor(ms/60000) % 60; const h = Math.floor(ms/3600000) % 24; const d = Math.floor(ms/86400000);
-  return { done: ms === 0, label: `${d}d ${h}h ${m}m ${s}s` };
+  return { 
+    done: ms === 0, 
+    label: `${d}:${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`,
+    daysLeft: d,
+    timeLeft: `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  };
 }
 
 // navbar visible on pages 3–6
@@ -61,6 +85,7 @@ function AppNav({ nav, route }) {
       borderRadius: "1rem",
       marginBottom: "2rem",
       width: "100%",
+      zIndex: 100,
     },
     profileContainer: {
       display: "flex",
@@ -162,18 +187,22 @@ function LoginPage({ nav, onLogin }) {
         flexDirection: "column",
         justifyContent: "center",
         gap: "0.75rem",
+        width: "100%",
       },
       input: {
         width: "100%",
+        maxWidth: "100%",
         border: "1px solid #4b5563",
         borderRadius: "0.5rem",
         padding: "0.75rem",
         backgroundColor: "#374151",
         color: "#ffffff",
         fontSize: "1rem",
+        boxSizing: "border-box",
       },
       button: {
         width: "100%",
+        maxWidth: "100%",
         backgroundColor: "#ffffff",
         color: "#000000",
         borderRadius: "0.5rem",
@@ -182,6 +211,7 @@ function LoginPage({ nav, onLogin }) {
         cursor: "pointer",
         fontWeight: "600",
         fontSize: "1rem",
+        boxSizing: "border-box",
         flexDirection: "column",
         justifyContent: "center",
       },
@@ -286,18 +316,22 @@ function SignupPage({ nav, onSignup }) {
       flexDirection: "column",
       justifyContent: "center",
       gap: "0.75rem",
+      width: "100%",
     },
     input: {
       width: "100%",
+      maxWidth: "100%",
       border: "1px solid #4b5563",
       borderRadius: "0.5rem",
       padding: "0.75rem",
       backgroundColor: "#374151",
       color: "#ffffff",
       fontSize: "1rem",
+      boxSizing: "border-box",
     },
     button: {
       width: "100%",
+      maxWidth: "100%",
       backgroundColor: "#ffffff",
       color: "#000000",
       borderRadius: "0.5rem",
@@ -306,6 +340,7 @@ function SignupPage({ nav, onSignup }) {
       cursor: "pointer",
       fontWeight: "600",
       fontSize: "1rem",
+      boxSizing: "border-box",
       flexDirection: "column",
       justifyContent: "center",
     },
@@ -379,10 +414,67 @@ function SignupPage({ nav, onSignup }) {
   );
 }
 
-function HomeBombPage({ bomb, setBomb, nav }) {
-  const { label } = useCountdown(bomb.deadline);
-  const wiresCut = bomb.wires.filter(w=>w.cut).length;
+function HomeBombPage({ bomb, setBomb, nav, friends }) {
+  const safeDeadline = bomb?.deadline ?? Date.now();
+  const { label, daysLeft, timeLeft, done } = useCountdown(safeDeadline);
+  const wires = bomb?.wires ?? [];
+  const wiresCut = wires.filter(w => w.cut).length;
   const [hoveredWire, setHoveredWire] = useState(null);
+  const [timerState, setTimerState] = useState('start'); // 'start', 'confirming', 'requesting'
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const explodedOnceRef = useRef(false);
+
+
+  const showNotificationMessage = (message) => {
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
+  const getTopFriend = () => {
+    return friends.length > 0 ? friends[0].name : 'No friends';
+  };
+
+  const handleTimerAction = () => {
+    if (timerState === 'start') {
+      setTimerState('confirming');
+      return;
+    }
+  
+    if (timerState === 'confirming') {
+      // Set bomb to the most recent (latest) wire due; ignore wires without a due
+      const dueTs = bomb.wires
+        .map(w => (w.due ? Date.parse(w.due) : null))
+        .filter(Boolean);
+  
+      const latestDueMs = dueTs.length
+        ? Math.max(...dueTs)
+        : (bomb.deadline || (Date.now() + 60 * 60 * 1000)); // fallback if none set
+  
+      setBomb(prev => ({ ...prev, deadline: latestDueMs }));
+      setTimerState('requesting'); // indicates timer is running
+      return;
+    }
+  
+    if (timerState === 'requesting') {
+      // Stop request → show 00:00 immediately
+      setBomb(prev => ({ ...prev, deadline: Date.now() }));
+      showNotificationMessage(`Sent timer stop request to ${getTopFriend()}`);
+      setTimerState('start');
+    }
+  };
+  
+  
+  
+
+  const handleCancel = () => {
+    if (timerState === 'confirming') {
+      setTimerState('start');
+    } else if (timerState === 'requesting') {
+      setTimerState('start');
+    }
+  };
   
   const styles = {
     container: {
@@ -426,7 +518,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     bombContainer: {
       position: "relative",
       width: "100%",
-      height: "30rem",
+      height: "24rem",
       margin: "2rem auto",
       display: "flex",
       justifyContent: "center",
@@ -435,7 +527,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     bomb: {
       position: "relative",
       width: "40rem",
-      height: "26rem",
+      height: "20rem",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -451,6 +543,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
       alignItems: "center",
       justifyContent: "center",
       boxShadow: "0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
+      zIndex: 1,
       border: "3px solid #4b5563",
       background: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
       marginBottom: "0",
@@ -479,14 +572,14 @@ function HomeBombPage({ bomb, setBomb, nav }) {
     },
     wire: {
       width: "16px",
-      height: "8rem",
+      height: "10rem",
       borderRadius: "8px",
       boxShadow: "0 3px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
       cursor: "pointer",
       transition: "all 0.3s ease",
       background: "linear-gradient(90deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
       position: "relative",
-      marginTop: "-2px",
+      marginTop: "-2px", // Negative margin to make wire touch timer
     },
     wireHover: {
       transform: "scale(1.1)",
@@ -500,34 +593,34 @@ function HomeBombPage({ bomb, setBomb, nav }) {
       cursor: "not-allowed",
     },
     stick: {
-      width: "7rem",
-      height: "12rem",
+      width: "4rem",
+      height: "6rem",
       backgroundColor: "#dc2626",
-      borderRadius: "1rem",
+      borderRadius: "0.5rem",
       position: "relative",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 3px 0 rgba(255, 255, 255, 0.2)",
+      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2)",
       background: "linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)",
-      marginTop: "-2px",
+      marginTop: "-2px", // Negative margin to make stick touch wire
     },
     stickBand: {
       position: "absolute",
-      top: "2rem",
-      left: "-0.75rem",
-      right: "-0.75rem",
-      height: "1.25rem",
+      top: "1rem",
+      left: "-0.25rem",
+      right: "-0.25rem",
+      height: "0.5rem",
       backgroundColor: "#1f2937",
-      borderRadius: "0.75rem",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
+      borderRadius: "0.25rem",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
     },
     stickBand2: {
       position: "absolute",
-      top: "8.75rem",
-      left: "-0.75rem",
-      right: "-0.75rem",
-      height: "1.25rem",
+      top: "4.5rem",
+      left: "-0.25rem",
+      right: "-0.25rem",
+      height: "0.5rem",
       backgroundColor: "#1f2937",
-      borderRadius: "0.75rem",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.1)",
+      borderRadius: "0.25rem",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
     },
     tooltip: {
       position: "absolute",
@@ -614,7 +707,63 @@ function HomeBombPage({ bomb, setBomb, nav }) {
       fontWeight: "500",
       transition: "all 0.2s",
     },
+    confirmButton: {
+      padding: "0.75rem 1rem",
+      border: "1px solid #22c55e",
+      borderRadius: "0.75rem",
+      backgroundColor: "#22c55e",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+      transition: "all 0.2s",
+    },
+    cancelButton: {
+      padding: "0.75rem 1rem",
+      border: "1px solid #ef4444",
+      borderRadius: "0.75rem",
+      backgroundColor: "#ef4444",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+      transition: "all 0.2s",
+    },
+    notification: {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      padding: "1rem 1.5rem",
+      backgroundColor: "#1f2937",
+      color: "#ffffff",
+      borderRadius: "0.5rem",
+      border: "1px solid #374151",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
+      zIndex: 1000,
+      fontSize: "0.875rem",
+    },
   };
+
+  useEffect(() => {
+  // Only process an explosion if the timer was actually running
+  if (timerState === 'requesting' && done && !explodedOnceRef.current) {
+    explodedOnceRef.current = true;
+
+    const hasUncut = bomb.wires.some(w => !w.cut);
+    if (hasUncut) {
+      // Delete all unfinished wires
+      setBomb(prev => ({
+        ...prev,
+        wires: prev.wires.filter(w => w.cut),
+      }));
+
+      // Notify failure
+      showNotificationMessage(`Notifying ${getTopFriend()} your bomb has blown up. You have failed. :(`);
+    }
+  }
+
+  // Reset the one-shot gate if timer is not done
+  if (!done) explodedOnceRef.current = false;
+}, [done, timerState, bomb.wires, setBomb]);
+
 
   return (
     <div style={styles.container}>
@@ -622,23 +771,20 @@ function HomeBombPage({ bomb, setBomb, nav }) {
         <div style={styles.bombCard}>
           <div style={styles.bombHeader}>
             <h2 style={styles.bombTitle}>Current Bomb</h2>
-            <span style={styles.countdown}>⏳ {label}</span>
+            <span style={styles.countdown}>⏳ Days Left: {daysLeft}</span>
           </div>
           <div style={styles.bombContainer}>
             <div style={styles.bomb}>
               {/* Wide Timer */}
               <div style={styles.timer}>
                 <div style={styles.timerDisplay}>
-                  {label.includes('h') ? 
-                    label.split(' ').slice(1, 3).join(' ').replace(/[dhms]/g, '') : 
-                    "00:00"
-                  }
+                  {daysLeft > 0 ? `${daysLeft}d ${timeLeft}` : timeLeft}
                 </div>
               </div>
               
               {/* Wires and Dynamite Sticks */}
               <div style={styles.wiresAndSticksContainer}>
-                {bomb.wires.map((wire, index) => (
+                {wires.map((wire, index) => (
                   <div key={wire.id} style={styles.wireStickPair}>
                     {/* Wire */}
                     <div 
@@ -668,7 +814,7 @@ function HomeBombPage({ bomb, setBomb, nav }) {
                       )}
                     </div>
                     
-                    {/* Large Dynamite Stick */}
+                    {/* Dynamite Stick */}
                     <div style={styles.stick}>
                       <div style={styles.stickBand}></div>
                       <div style={styles.stickBand2}></div>
@@ -678,13 +824,13 @@ function HomeBombPage({ bomb, setBomb, nav }) {
               </div>
             </div>
           </div>
-          <div style={styles.wiresCount}>Wires cut: {wiresCut}/{bomb.wires.length}</div>
+          <div style={styles.wiresCount}>Wires cut: {wiresCut}/{wires.length}</div>
         </div>
         <div style={styles.sidebar}>
           <div style={styles.legendCard}>
             <div style={styles.legendTitle}>Legend</div>
             <ul style={styles.legendList}>
-              {bomb.wires.map(w=> (
+              {wires.map(w=> (
                 <li key={w.id} style={styles.legendItem}>
                   <span 
                     style={{
@@ -713,18 +859,74 @@ function HomeBombPage({ bomb, setBomb, nav }) {
               Add Task
             </button>
           </div>
+          <div style={{...styles.actionButtons, marginTop: "1rem"}}>
+            {timerState === 'start' && (
+              <button 
+                style={styles.actionButton} 
+                onClick={handleTimerAction}
+              >
+                Start timer?
+              </button>
+            )}
+            {timerState === 'confirming' && (
+              <>
+                <button 
+                  style={styles.confirmButton} 
+                  onClick={handleTimerAction}
+                >
+                  Confirm
+                </button>
+                <button 
+                  style={styles.cancelButton} 
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+            {timerState === 'requesting' && (
+              <button 
+                style={styles.actionButton} 
+                onClick={handleTimerAction}
+              >
+                Request to Stop timer
+              </button>
+            )}
+          </div>
         </div>
       </div>
+      {showNotification && (
+        <div style={styles.notification}>
+          {notificationMessage}
+        </div>
+      )}
     </div>
   );
 }
-
 function TasksPage({ tasks, setTasks, bomb, setBomb }) {
   const [t, setT] = useState("");
   const [due, setDue] = useState("");
   
   // Array of colors to cycle through for new wires
   const wireColors = ["#ef4444", "#22c55e", "#3b82f6", "#eab308", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+  
+  // Check if all tasks are complete or deleted
+  const allTasksComplete = tasks.length === 0 || tasks.every(task => task.done);
+  const canSetDate = allTasksComplete;
+  
+  // Get the next most recent active task date
+  const getNextActiveTaskDate = () => {
+    const activeTasks = tasks.filter(task => !task.done && task.due);
+    if (activeTasks.length > 0) {
+      // Sort by due date and get the most recent one
+      const sortedTasks = activeTasks.sort((a, b) => new Date(b.due) - new Date(a.due));
+      return sortedTasks[0].due;
+    }
+    // If no active tasks with dates, use bomb deadline
+    return new Date(bomb.deadline).toISOString().slice(0, 16);
+  };
+
+  // Create combined task list from both tasks state and bomb.wires
   
   const styles = {
     container: {
@@ -774,6 +976,10 @@ function TasksPage({ tasks, setTasks, bomb, setBomb }) {
       flexDirection: "column",
       gap: "1rem",
       width: "100%",
+      zIndex: 1,
+      maxHeight: "60vh",
+      overflowY: "auto",
+      paddingRight: "0.5rem",
     },
     emptyState: {
       fontSize: "1rem",
@@ -826,47 +1032,46 @@ function TasksPage({ tasks, setTasks, bomb, setBomb }) {
     },
   };
 
+  // Latest due among existing wires, or fall back to current bomb deadline
+  const getLatestWireDueISO = () => {
+    const ts = bomb.wires
+      .map(w => (w.due ? Date.parse(w.due) : null))
+      .filter(Boolean);
+    const fallback = new Date(bomb.deadline).toISOString();
+    return ts.length ? new Date(Math.max(...ts)).toISOString() : fallback;
+  };
+
+  const handleTaskToggle = (wireId) => {
+    setBomb(prev => ({
+      ...prev,
+      wires: prev.wires.map(w => w.id === wireId ? { ...w, cut: !w.cut } : w)
+    }));
+  };
+
   const handleAddTask = () => {
     if (!t) return;
-    
-    // Create new task
-    const newTask = { 
-      id: crypto.randomUUID(), 
-      title: t, 
-      due: due || null, 
-      done: false 
-    };
-    
-    // Create new wire for the bomb
+  
+    // If user didn’t pick a due, auto-assign most recent wire due (or bomb deadline)
+    const derivedDueISO = due ? new Date(due).toISOString() : getLatestWireDueISO();
+  
     const newWire = {
       id: crypto.randomUUID(),
       task: t,
-      color: wireColors[bomb.wires.length % wireColors.length], // Cycle through colors
-      cut: false
+      color: wireColors[bomb.wires.length % wireColors.length],
+      cut: false,
+      due: derivedDueISO, // always set a due
     };
-    
-    // Add task to tasks list
-    setTasks(prev => [...prev, newTask]);
-    
-    // Add wire to bomb
-    setBomb(prev => ({
-      ...prev,
-      wires: [...prev.wires, newWire]
-    }));
-    
-    // Clear form
+  
+    setBomb(prev => ({ ...prev, wires: [...prev.wires, newWire] }));
     setT("");
     setDue("");
   };
+  
 
-  const handleDeleteTask = (taskId, taskTitle) => {
-    // Remove task from tasks list
-    setTasks(prev => prev.filter(x => x.id !== taskId));
-    
-    // Remove corresponding wire from bomb
+  const handleDeleteTask = (wireId) => {
     setBomb(prev => ({
       ...prev,
-      wires: prev.wires.filter(w => w.task !== taskTitle)
+      wires: prev.wires.filter(w => w.id !== wireId)
     }));
   };
 
@@ -881,10 +1086,12 @@ function TasksPage({ tasks, setTasks, bomb, setBomb }) {
           onChange={e=>setT(e.target.value)} 
         />
         <input 
-          style={styles.input} 
+          style={{...styles.input, opacity: canSetDate ? 1 : 0.5, cursor: canSetDate ? 'text' : 'not-allowed'}} 
           type="datetime-local" 
           value={due} 
           onChange={e=>setDue(e.target.value)} 
+          disabled={!canSetDate}
+          placeholder={canSetDate ? "Due date" : "Complete all tasks to set new dates"}
         />
         <button 
           style={styles.addButton} 
@@ -894,36 +1101,37 @@ function TasksPage({ tasks, setTasks, bomb, setBomb }) {
         </button>
       </div>
       <div style={styles.tasksList}>
-        {tasks.length===0 && <div style={styles.emptyState}>No tasks yet.</div>}
-        {tasks.map(task=> (
-          <div key={task.id} style={styles.taskItem}>
-            <div style={styles.taskInfo}>
-              <div style={task.done ? styles.taskTitleDone : styles.taskTitle}>
-                {task.title}
+      {bomb.wires.length === 0 && <div style={styles.emptyState}>No tasks yet.</div>}
+      {bomb.wires.map(wire => (
+        <div key={wire.id} style={styles.taskItem}>
+          <div style={styles.taskInfo}>
+            <div style={wire.cut ? styles.taskTitleDone : styles.taskTitle}>
+              {wire.task}
+            </div>
+            {wire.due && (
+              <div style={styles.taskDue}>
+                Due: {new Date(wire.due).toLocaleString()}
               </div>
-              {task.due && (
-                <div style={styles.taskDue}>
-                  Due: {new Date(task.due).toLocaleString()}
-                </div>
-              )}
-            </div>
-            <div style={styles.taskActions}>
-              <button 
-                style={styles.actionButton} 
-                onClick={()=>setTasks(prev=>prev.map(x=>x.id===task.id?{...x,done:!x.done}:x))}
-              >
-                {task.done?"Undo":"Complete"}
-              </button>
-              <button 
-                style={styles.actionButton} 
-                onClick={() => handleDeleteTask(task.id, task.title)}
-              >
-                Delete
-              </button>
-            </div>
+            )}
           </div>
-        ))}
-      </div>
+          <div style={styles.taskActions}>
+            <button
+              style={styles.actionButton}
+              onClick={() => handleTaskToggle(wire.id)}
+            >
+              {wire.cut ? "Undo" : "Complete"}
+            </button>
+            <button
+              style={styles.actionButton}
+              onClick={() => handleDeleteTask(wire.id)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
     </div>
   );
 }
@@ -1149,6 +1357,7 @@ function ProfilePage({ user, stats, friends, setFriends, onLogout }) {
       border: "1px solid #4b5563",
       borderRadius: "0.5rem",
       backgroundColor: "#374151",
+      width: "100%",
     },
     friendEmail: {
       color: "#9ca3af",
@@ -1260,15 +1469,34 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [friends, setFriends] = useState([{ name:"alex", email:"alex@cmu.edu" }, { name:"riley", email:"riley@cmu.edu" }]);
   const [stats, setStats] = useState({ defused: 2, exploded: 1 });
-  const [bomb, setBomb] = useState(()=>({
-    deadline: Date.now() + 1000*60*60 + 1000*10, // ~6h 10s
-    wires: [
-      { id:"w1", task:"Do dishes", color:"#ef4444", cut:false },
-      { id:"w2", task:"Finish essay", color:"#22c55e", cut:false },
-      { id:"w3", task:"Gym 45m", color:"#3b82f6", cut:false },
-      { id:"w4", task:"Call mom", color:"#eab308", cut:false },
-    ],
-  }));
+  const [bomb, setBomb] = useState(() => {
+    // Try cookie
+    const saved = getCookie("bombData");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.log("Failed to parse saved bomb data");
+      }
+    }
+    // Default when no cookie
+    return {
+      deadline: Date.now(), // show 00:00 until user hits Confirm
+      wires: [
+        { id: "w1", task: "Do dishes",  color: "#ef4444", cut: false },
+        { id: "w2", task: "Finish essay", color: "#22c55e", cut: false },
+        { id: "w3", task: "Gym 45m",    color: "#3b82f6", cut: false },
+        { id: "w4", task: "Call mom",   color: "#eab308", cut: false },
+      ],
+    };
+  });
+  
+
+  // Save bomb data to cookies whenever it changes
+  useEffect(() => {
+    setCookie('bombData', JSON.stringify(bomb), 7); // Save for 7 days
+  }, [bomb]);
 
   // redirect rules: if not logged in, show login/signup; else show app pages
   useEffect(()=>{
@@ -1330,7 +1558,7 @@ export default function App() {
         {/* ROUTES */}
         {route===routes.login && <LoginPage nav={nav} onLogin={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
         {route===routes.signup && <SignupPage nav={nav} onSignup={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
-        {isLogged && route===routes.home && <HomeBombPage bomb={bomb} setBomb={setBomb} nav={nav} />}
+        {isLogged && route===routes.home && <HomeBombPage bomb={bomb} setBomb={setBomb} nav={nav} friends={friends} />}
         {isLogged && route===routes.tasks && <TasksPage tasks={tasks} setTasks={setTasks} bomb={bomb} setBomb={setBomb} />}
         {isLogged && route===routes.punishments && <PunishmentsPage punishments={punishments} setPunishments={setPunishments} />}
         {isLogged && route===routes.profile && (
@@ -1340,14 +1568,13 @@ export default function App() {
         {/* footer */}
         <footer style={styles.footer}>
           <div style={styles.footerContent}>
-            <div style={styles.footerTitle}>Next steps</div>
-            <ul style={styles.footerList}>
-              <li>Replace mock auth with Firebase/Supabase; protect routes on server too.</li>
-              <li>Send email invites to verifiers; verification dashboard w/ Approve/Reject.</li>
-              <li>Server‑enforced timers (Cloud Functions / cron) to trigger punishments.</li>
-              <li>Stripe SetupIntent to hold penalty; capture on failure; add non‑monetary options.</li>
-              <li>Persist tasks, punishments, friendships in database; attach to bombs.</li>
-            </ul>
+            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "1rem"}}>
+              "We aim to attract striving users who seek to improve themselves through our site. Most notably college students who tend to forget and give no second thought to the importance of deadlines. With our site, every task on the user's to-do list becomes an urgent priority. There's absolutely no leeway."
+            </div>
+            <div style={{...styles.footerTitle, textAlign: "center", marginBottom: "0.5rem"}}>Authors</div>
+            <div style={{textAlign: "center", fontSize: "0.875rem", color: "#9ca3af"}}>
+              Mario B, Adrian M, Albert Z, Gary G
+            </div>
           </div>
         </footer>
       </div>
