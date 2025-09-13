@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Todo App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+        <!-- Message Area -->
+        <div id="message-area" class="p-3 mb-4 rounded-md text-sm hidden"></div>
+
+        <!-- Auth Section: Login & Register -->
+        <div id="auth-section">
+            <!-- <h1 class="text-2xl font-bold text-center mb-6">Account System</h1> -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Registration Form -->
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Register</h2>
+                    <form id="register-form" class="space-y-4">
+                        <div>
+                            <label for="reg-username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="reg-username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="reg-email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="reg-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="reg-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="reg-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">Register</button>
+                    </form>
+                </div>
+
+                <!-- Login Form -->
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Login</h2>
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label for="login-username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="login-username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-md hover:bg-green-700 transition-colors">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Todo Section: Hidden by default -->
+        <div id="todo-section" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold">My To-Do List</h1>
+                <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 transition-colors">Logout</button>
+            </div>
+            
+            <!-- Add Task Form -->
+            <form id="task-form" class="flex gap-2 mb-6">
+                <input type="text" id="task-description" placeholder="What do you need to do?" required class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">Add Task</button>
+            </form>
+
+            <!-- Task List -->
+            <ul id="task-list" class="space-y-3">
+                <!-- Tasks will be injected here by JavaScript -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_URL = 'http://127.0.0.1:5000';
+            let currentUserId = null;
+
+            // --- Element Selectors ---
+            const messageArea = document.getElementById('message-area');
+            const authSection = document.getElementById('auth-section');
+            const todoSection = document.getElementById('todo-section');
+            const registerForm = document.getElementById('register-form');
+            const loginForm = document.getElementById('login-form');
+            const taskForm = document.getElementById('task-form');
+            const taskList = document.getElementById('task-list');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            // --- UI Update Functions ---
+            const showMessage = (message, isError = false) => {
+                messageArea.textContent = message;
+                messageArea.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+                messageArea.classList.add(isError ? 'bg-red-100' : 'bg-green-100', isError ? 'text-red-800' : 'text-green-800');
+            };
+
+            const showAuthView = () => {
+                authSection.classList.remove('hidden');
+                todoSection.classList.add('hidden');
+                currentUserId = null;
+                messageArea.classList.add('hidden');
+            };
+
+            const showTodoView = () => {
+                authSection.classList.add('hidden');
+                todoSection.classList.remove('hidden');
+                messageArea.classList.add('hidden');
+                fetchAndDisplayTasks();
+            };
+
+            // --- API Call Functions ---
+            const fetchAndDisplayTasks = async () => {
+                if (!currentUserId) return;
+                try {
+                    const response = await fetch(`${API_URL}/tasks/${currentUserId}`);
+                    const tasks = await response.json();
+                    
+                    taskList.innerHTML = ''; // Clear existing tasks
+                    if (tasks.length === 0) {
+                        taskList.innerHTML = `<li class="text-gray-500 text-center">No tasks yet. Add one above!</li>`;
+                    } else {
+                        tasks.forEach(task => {
+                            const li = document.createElement('li');
+                            li.className = 'p-3 bg-gray-50 rounded-md shadow-sm flex justify-between items-center';
+                            li.textContent = task.description;
+                            taskList.appendChild(li);
+                        });
+                    }
+                } catch (error) {
+                    showMessage('Could not fetch tasks.', true);
+                }
+            };
+            
+            // --- Event Listeners ---
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = {
+                    username: e.target.querySelector('#reg-username').value,
+                    email: e.target.querySelector('#reg-email').value,
+                    password: e.target.querySelector('#reg-password').value,
+                };
+
+                try {
+                    const response = await fetch(`${API_URL}/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    const result = await response.json();
+                    showMessage(result.message || result.error, !response.ok);
+                    if (response.ok) registerForm.reset();
+                } catch (error) {
+                    showMessage('Could not connect to server.', true);
+                }
+            });
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = {
+                    username: e.target.querySelector('#login-username').value,
+                    password: e.target.querySelector('#login-password').value,
+                };
+                try {
+                    const response = await fetch(`${API_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        currentUserId = result.userId;
+                        showTodoView();
+                    } else {
+                        showMessage(result.error, true);
+                    }
+                } catch (error) {
+                    showMessage('Could not connect to server.', true);
+                }
+            });
+
+            taskForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const descriptionInput = e.target.querySelector('#task-description');
+                const description = descriptionInput.value;
+                if (!description.trim()) return;
+
+                try {
+                    const response = await fetch(`${API_URL}/tasks`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description, userId: currentUserId }),
+                    });
+
+                    if (response.ok) {
+                        descriptionInput.value = '';
+                        fetchAndDisplayTasks(); // Refresh the list
+                    } else {
+                        const result = await response.json();
+                        showMessage(result.error, true);
+                    }
+                } catch (error) {
+                    showMessage('Could not add task.', true);
+                }
+            });
+            
+            logoutBtn.addEventListener('click', showAuthView);
+        });
+    </script>
+</body>
+</html>
+
