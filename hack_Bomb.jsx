@@ -51,49 +51,77 @@ function AppNav({ nav, route }) {
     { id: routes.profile, label: "Profile" },
   ];
 
+  const styles = {
+    container: {
+      position: "sticky",
+      top: 0,
+      backdropFilter: "blur(4px)",
+      padding: "1rem",
+      backgroundColor: "rgba(15, 15, 15, 0.8)",
+      borderRadius: "1rem",
+      marginBottom: "2rem",
+      width: "100%",
+      maxWidth: "800px",
+    },
+    profileContainer: {
+      display: "flex",
+      justifyContent: "flex-start",
+    },
+    profileIcon: {
+      fontSize: "2rem",
+      color: "#ffffff",
+    },
+    title: {
+      fontSize: "4rem",
+      fontWeight: "bold",
+      textAlign: "center",
+      margin: "12px 0",
+      color: "#ffffff",
+    },
+    navContainer: {
+      display: "flex",
+      justifyContent: "center",
+      gap: "0.5rem",
+      marginTop: "1rem",
+    },
+    navButtonActive: {
+      padding: "0.5rem 1rem",
+      border: "1px solid #374151",
+      borderRadius: "8px",
+      background: "#ffffff",
+      color: "#000000",
+      cursor: "pointer",
+      fontWeight: "600",
+    },
+    navButtonInactive: {
+      padding: "0.5rem 1rem",
+      border: "1px solid #374151",
+      borderRadius: "8px",
+      background: "transparent",
+      color: "#9ca3af",
+      cursor: "pointer",
+    },
+  };
+
   return (
-    <div
-      style={{
-        position: "sticky",
-        top: 0,
-        background: "rgba(255,255,255,0.8)",
-        backdropFilter: "blur(4px)",
-        borderBottom: "1px solid #ddd",
-        padding: "1rem",
-      }}
-    >
+    <div style={styles.container}>
       {/* Profile icon top-left */}
-      <div style={{ display: "flex", justifyContent: "flex-start" }}>
-        <span style={{ fontSize: "2rem" }}>👤</span>
+      <div style={styles.profileContainer}>
+        <span style={styles.profileIcon}>👤</span>
       </div>
 
       {/* Huge centered title */}
-      <h1
-        style={{
-          fontSize: "4rem",
-          fontWeight: "bold",
-          textAlign: "center",
-          margin: "12px 0",
-          transform: "translate(70%, 0%)",
-        }}
-      >
-        To-Do Or Die
+      <h1 style={styles.title}>
+        To-Do Or Die.
       </h1>
 
       {/* Nav buttons aligned right */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+      <div style={styles.navContainer}>
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => nav(t.id)}
-            style={{
-              padding: "0.5rem 1rem",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              background: route === t.id ? "#111" : "#fff",
-              color: route === t.id ? "#fff" : "#000",
-              cursor: "pointer",
-            }}
+            style={route === t.id ? styles.navButtonActive : styles.navButtonInactive}
           >
             {t.label}
           </button>
@@ -108,15 +136,103 @@ function AppNav({ nav, route }) {
 function LoginPage({ nav, onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  const styles = {
+    container: {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "1.5rem",
+    },
+    card: {
+      width: "100%",
+      maxWidth: "28rem",
+      padding: "2rem",
+      borderRadius: "1rem",
+      border: "1px solid #374151",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+      backgroundColor: "#1f2937",
+    },
+    title: {
+      fontSize: "1.5rem",
+      fontWeight: "bold",
+      marginBottom: "1.5rem",
+      textAlign: "center",
+      color: "#ffffff",
+    },
+    formContainer: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.75rem",
+    },
+    input: {
+      width: "100%",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      fontSize: "1rem",
+    },
+    button: {
+      width: "100%",
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: "0.5rem",
+      padding: "0.75rem 0",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "1rem",
+    },
+    linkContainer: {
+      fontSize: "0.875rem",
+      textAlign: "center",
+      color: "#9ca3af",
+    },
+    link: {
+      textDecoration: "underline",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#ffffff",
+    },
+  };
+
   return (
-    <div className="min-h-screen grid place-items-center p-6">
-      <div className="w-full max-w-md p-6 rounded-2xl border shadow-sm bg-white">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login Or Die.</h1>
-        <div className="space-y-3">
-          <input className="w-full border rounded-lg px-3 py-2" placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
-          <input className="w-full border rounded-lg px-3 py-2" placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-          <button className="w-full bg-gray-900 text-white rounded-lg py-2" onClick={() => onLogin({ email })}>Sign in (mock)</button>
-          <div className="text-sm text-center">Don't have an account? <button className="underline" onClick={()=>nav(routes.signup)}>Sign up</button></div>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Login Or Die.</h1>
+        <div style={styles.formContainer}>
+          <input 
+            style={styles.input} 
+            placeholder="email" 
+            value={email} 
+            onChange={e=>setEmail(e.target.value)} 
+          />
+          <input 
+            style={styles.input} 
+            placeholder="password" 
+            type="password" 
+            value={password} 
+            onChange={e=>setPassword(e.target.value)} 
+          />
+          <button 
+            style={styles.button} 
+            onClick={() => onLogin({ email })}
+          >
+            Sign in (mock)
+          </button>
+          <div style={styles.linkContainer}>
+            Don't have an account? 
+            <button 
+              style={styles.link} 
+              onClick={()=>nav(routes.signup)}
+            >
+              Sign up
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -127,16 +243,109 @@ function SignupPage({ nav, onSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  
+  const styles = {
+    container: {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "1.5rem",
+    },
+    card: {
+      width: "100%",
+      maxWidth: "28rem",
+      padding: "2rem",
+      borderRadius: "1rem",
+      border: "1px solid #374151",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+      backgroundColor: "#1f2937",
+    },
+    title: {
+      fontSize: "1.5rem",
+      fontWeight: "bold",
+      marginBottom: "1.5rem",
+      textAlign: "center",
+      color: "#ffffff",
+    },
+    formContainer: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.75rem",
+    },
+    input: {
+      width: "100%",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      fontSize: "1rem",
+    },
+    button: {
+      width: "100%",
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: "0.5rem",
+      padding: "0.75rem 0",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "1rem",
+    },
+    linkContainer: {
+      fontSize: "0.875rem",
+      textAlign: "center",
+      color: "#9ca3af",
+    },
+    link: {
+      textDecoration: "underline",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#ffffff",
+    },
+  };
+
   return (
-    <div className="min-h-screen grid place-items-center p-6">
-      <div className="w-full max-w-md p-6 rounded-2xl border shadow-sm bg-white">
-        <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
-        <div className="space-y-3">
-          <input className="w-full border rounded-lg px-3 py-2" placeholder="name" value={name} onChange={e=>setName(e.target.value)} />
-          <input className="w-full border rounded-lg px-3 py-2" placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
-          <input className="w-full border rounded-lg px-3 py-2" placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-          <button className="w-full bg-gray-900 text-white rounded-lg py-2" onClick={() => onSignup({ email, name })}>Sign up (mock)</button>
-          <div className="text-sm text-center">Already have an account? <button className="underline" onClick={()=>nav(routes.login)}>Log in</button></div>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Create Account</h1>
+        <div style={styles.formContainer}>
+          <input 
+            style={styles.input} 
+            placeholder="name" 
+            value={name} 
+            onChange={e=>setName(e.target.value)} 
+          />
+          <input 
+            style={styles.input} 
+            placeholder="email" 
+            value={email} 
+            onChange={e=>setEmail(e.target.value)} 
+          />
+          <input 
+            style={styles.input} 
+            placeholder="password" 
+            type="password" 
+            value={password} 
+            onChange={e=>setPassword(e.target.value)} 
+          />
+          <button 
+            style={styles.button} 
+            onClick={() => onSignup({ email, name })}
+          >
+            Sign up (mock)
+          </button>
+          <div style={styles.linkContainer}>
+            Already have an account? 
+            <button 
+              style={styles.link} 
+              onClick={()=>nav(routes.login)}
+            >
+              Log in
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -146,42 +355,210 @@ function SignupPage({ nav, onSignup }) {
 function HomeBombPage({ bomb, setBomb, nav }) {
   const { label } = useCountdown(bomb.deadline);
   const wiresCut = bomb.wires.filter(w=>w.cut).length;
-  return (
-    <div
-  style={{
-    width: "100%",           // fill the whole viewport width
-    padding: "16px 16px 8px" // similar spacing
-  }}
->
+  
+  const styles = {
+    container: {
+      width: "100%",
+      maxWidth: "1000px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "2rem",
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "2rem",
+      width: "100%",
+    },
+    bombCard: {
+      padding: "2rem",
+      borderRadius: "1rem",
+      border: "1px solid #374151",
+      backgroundColor: "#1f2937",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+    },
+    bombHeader: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: "1.5rem",
+    },
+    bombTitle: {
+      fontSize: "1.5rem",
+      fontWeight: "600",
+      color: "#ffffff",
+    },
+    countdown: {
+      fontSize: "0.875rem",
+      padding: "0.5rem 1rem",
+      borderRadius: "9999px",
+      backgroundColor: "#10b981",
+      color: "#ffffff",
+      fontWeight: "600",
+    },
+    bombContainer: {
+      position: "relative",
+      width: "20rem",
+      height: "20rem",
+      margin: "2rem auto",
+    },
+    bomb: {
+      position: "absolute",
+      inset: "0",
+      borderRadius: "50%",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      display: "grid",
+      placeItems: "center",
+      fontSize: "3rem",
+      fontWeight: "bold",
+      border: "3px solid #4b5563",
+    },
+    wireButton: {
+      position: "absolute",
+      left: "50%",
+      transform: "translateX(-50%)",
+      padding: "0.5rem 1rem",
+      borderRadius: "9999px",
+      border: "2px solid #6b7280",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      fontSize: "0.875rem",
+      fontWeight: "600",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+      cursor: "pointer",
+      transition: "all 0.2s",
+    },
+    wireButtonHover: {
+      transform: "translateX(-50%) scale(1.05)",
+    },
+    wireButtonCut: {
+      textDecoration: "line-through",
+      opacity: "0.6",
+      backgroundColor: "#6b7280",
+    },
+    wiresCount: {
+      fontSize: "1rem",
+      color: "#9ca3af",
+      textAlign: "center",
+      marginTop: "1rem",
+    },
+    sidebar: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "1.5rem",
+    },
+    legendCard: {
+      padding: "1.5rem",
+      borderRadius: "1rem",
+      border: "1px solid #374151",
+      backgroundColor: "#1f2937",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+    },
+    legendTitle: {
+      fontWeight: "600",
+      marginBottom: "1rem",
+      color: "#ffffff",
+      fontSize: "1.125rem",
+    },
+    legendList: {
+      fontSize: "0.875rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.75rem",
+    },
+    legendItem: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.75rem",
+    },
+    colorDot: {
+      width: "1rem",
+      height: "1rem",
+      borderRadius: "50%",
+    },
+    actionButtons: {
+      display: "grid",
+      gridTemplateColumns: "repeat(2, 1fr)",
+      gap: "1rem",
+    },
+    actionButton: {
+      padding: "0.75rem 1rem",
+      border: "1px solid #374151",
+      borderRadius: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+      transition: "all 0.2s",
+    },
+  };
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 p-6 rounded-2xl border bg-white">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Current Bomb</h2>
-            <span className="text-sm px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">⏳ {label}</span>
+  return (
+    <div style={styles.container}>
+      <div style={styles.grid}>
+        <div style={styles.bombCard}>
+          <div style={styles.bombHeader}>
+            <h2 style={styles.bombTitle}>Current Bomb</h2>
+            <span style={styles.countdown}>⏳ {label}</span>
           </div>
-          <div className="relative w-64 h-64 mx-auto my-6">
-            <div className="absolute inset-0 rounded-full bg-gray-900 text-white grid place-items-center text-3xl font-bold">💥</div>
+          <div style={styles.bombContainer}>
+            <div style={styles.bomb}>💥</div>
             {bomb.wires.map((w,i)=> (
-              <button key={w.id} onClick={()=>setBomb(prev=>({...prev, wires: prev.wires.map(x=>x.id===w.id?{...x, cut:!x.cut}:x)}))} className={`absolute left-1/2 -translate-x-1/2 px-3 py-1 rounded-full border bg-white text-xs shadow hover:scale-105 transition ${w.cut?"line-through opacity-60":""}`} style={{ top: 18 + i*40 }}>
+              <button 
+                key={w.id} 
+                onClick={()=>setBomb(prev=>({...prev, wires: prev.wires.map(x=>x.id===w.id?{...x, cut:!x.cut}:x)}))} 
+                style={{
+                  ...styles.wireButton,
+                  top: 18 + i*40,
+                  ...(w.cut ? styles.wireButtonCut : {}),
+                }}
+                onMouseEnter={(e) => {
+                  if (!w.cut) {
+                    e.target.style.transform = "translateX(-50%) scale(1.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = "translateX(-50%) scale(1)";
+                }}
+              >
                 {w.cut?"Cut":"Wire"} {i+1}
               </button>
             ))}
           </div>
-          <div className="text-sm text-gray-600 text-center">Wires cut: {wiresCut}/{bomb.wires.length}</div>
+          <div style={styles.wiresCount}>Wires cut: {wiresCut}/{bomb.wires.length}</div>
         </div>
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl border bg-white">
-            <div className="font-semibold mb-2">Legend</div>
-            <ul className="text-sm space-y-1">
+        <div style={styles.sidebar}>
+          <div style={styles.legendCard}>
+            <div style={styles.legendTitle}>Legend</div>
+            <ul style={styles.legendList}>
               {bomb.wires.map(w=> (
-                <li key={w.id} className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full`} style={{background:w.color}}></span> <span>{w.task}</span></li>
+                <li key={w.id} style={styles.legendItem}>
+                  <span 
+                    style={{
+                      ...styles.colorDot,
+                      backgroundColor: w.color,
+                    }}
+                  ></span> 
+                  <span>{w.task}</span>
+                </li>
               ))}
             </ul>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button className="px-3 py-2 border rounded-xl" onClick={()=>nav(routes.punishments)}>Add Punishment</button>
-            <button className="px-3 py-2 border rounded-xl" onClick={()=>nav(routes.tasks)}>Add Task</button>
+          <div style={styles.actionButtons}>
+            <button 
+              style={styles.actionButton} 
+              onClick={()=>nav(routes.punishments)}
+            >
+              Add Punishment
+            </button>
+            <button 
+              style={styles.actionButton} 
+              onClick={()=>nav(routes.tasks)}
+            >
+              Add Task
+            </button>
           </div>
         </div>
       </div>
@@ -192,25 +569,164 @@ function HomeBombPage({ bomb, setBomb, nav }) {
 function TasksPage({ tasks, setTasks }) {
   const [t, setT] = useState("");
   const [due, setDue] = useState("");
+  
+  const styles = {
+    container: {
+      maxWidth: "800px",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "2rem",
+    },
+    title: {
+      fontSize: "2rem",
+      fontWeight: "bold",
+      marginBottom: "2rem",
+      color: "#ffffff",
+    },
+    formCard: {
+      padding: "1.5rem",
+      border: "1px solid #374151",
+      borderRadius: "1rem",
+      backgroundColor: "#1f2937",
+      marginBottom: "2rem",
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "1rem",
+      width: "100%",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+    },
+    input: {
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      fontSize: "1rem",
+    },
+    addButton: {
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "1rem",
+    },
+    tasksList: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "1rem",
+      width: "100%",
+    },
+    emptyState: {
+      fontSize: "1rem",
+      color: "#9ca3af",
+      textAlign: "center",
+      padding: "2rem",
+    },
+    taskItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "1.5rem",
+      border: "1px solid #374151",
+      borderRadius: "1rem",
+      backgroundColor: "#1f2937",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)",
+    },
+    taskInfo: {
+      display: "flex",
+      flexDirection: "column",
+    },
+    taskTitle: {
+      fontWeight: "500",
+      color: "#ffffff",
+      fontSize: "1.125rem",
+    },
+    taskTitleDone: {
+      fontWeight: "500",
+      textDecoration: "line-through",
+      color: "#6b7280",
+      fontSize: "1.125rem",
+    },
+    taskDue: {
+      fontSize: "0.875rem",
+      color: "#9ca3af",
+      marginTop: "0.25rem",
+    },
+    taskActions: {
+      display: "flex",
+      gap: "0.75rem",
+    },
+    actionButton: {
+      padding: "0.5rem 1rem",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+    },
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">Tasks</h2>
-      <div className="p-4 border rounded-2xl bg-white mb-4 grid md:grid-cols-3 gap-2">
-        <input className="border rounded-lg px-3 py-2" placeholder="Task title" value={t} onChange={e=>setT(e.target.value)} />
-        <input className="border rounded-lg px-3 py-2" type="datetime-local" value={due} onChange={e=>setDue(e.target.value)} />
-        <button className="bg-gray-900 text-white rounded-lg px-3" onClick={()=>{ if(!t) return; setTasks(prev=>[...prev,{ id:crypto.randomUUID(), title:t, due:due||null, done:false }]); setT(""); setDue(""); }}>Add Task</button>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Tasks</h2>
+      <div style={styles.formCard}>
+        <input 
+          style={styles.input} 
+          placeholder="Task title" 
+          value={t} 
+          onChange={e=>setT(e.target.value)} 
+        />
+        <input 
+          style={styles.input} 
+          type="datetime-local" 
+          value={due} 
+          onChange={e=>setDue(e.target.value)} 
+        />
+        <button 
+          style={styles.addButton} 
+          onClick={()=>{ 
+            if(!t) return; 
+            setTasks(prev=>[...prev,{ id:crypto.randomUUID(), title:t, due:due||null, done:false }]); 
+            setT(""); 
+            setDue(""); 
+          }}
+        >
+          Add Task
+        </button>
       </div>
-      <div className="space-y-2">
-        {tasks.length===0 && <div className="text-sm text-gray-600">No tasks yet.</div>}
+      <div style={styles.tasksList}>
+        {tasks.length===0 && <div style={styles.emptyState}>No tasks yet.</div>}
         {tasks.map(task=> (
-          <div key={task.id} className="flex items-center justify-between p-3 border rounded-xl bg-white">
-            <div>
-              <div className={`font-medium ${task.done?"line-through text-gray-400":""}`}>{task.title}</div>
-              {task.due && <div className="text-xs text-gray-500">Due: {new Date(task.due).toLocaleString()}</div>}
+          <div key={task.id} style={styles.taskItem}>
+            <div style={styles.taskInfo}>
+              <div style={task.done ? styles.taskTitleDone : styles.taskTitle}>
+                {task.title}
+              </div>
+              {task.due && (
+                <div style={styles.taskDue}>
+                  Due: {new Date(task.due).toLocaleString()}
+                </div>
+              )}
             </div>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 border rounded-lg" onClick={()=>setTasks(prev=>prev.map(x=>x.id===task.id?{...x,done:!x.done}:x))}>{task.done?"Undo":"Complete"}</button>
-              <button className="px-3 py-1 border rounded-lg" onClick={()=>setTasks(prev=>prev.filter(x=>x.id!==task.id))}>Delete</button>
+            <div style={styles.taskActions}>
+              <button 
+                style={styles.actionButton} 
+                onClick={()=>setTasks(prev=>prev.map(x=>x.id===task.id?{...x,done:!x.done}:x))}
+              >
+                {task.done?"Undo":"Complete"}
+              </button>
+              <button 
+                style={styles.actionButton} 
+                onClick={()=>setTasks(prev=>prev.filter(x=>x.id!==task.id))}
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
@@ -222,23 +738,142 @@ function TasksPage({ tasks, setTasks }) {
 function PunishmentsPage({ punishments, setPunishments }) {
   const [p, setP] = useState("");
   const [amount, setAmount] = useState("5");
+  
+  const styles = {
+    container: {
+      maxWidth: "800px",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "2rem",
+    },
+    title: {
+      fontSize: "2rem",
+      fontWeight: "bold",
+      marginBottom: "2rem",
+      color: "#ffffff",
+    },
+    formCard: {
+      padding: "1.5rem",
+      border: "1px solid #374151",
+      borderRadius: "1rem",
+      backgroundColor: "#1f2937",
+      marginBottom: "2rem",
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "1rem",
+      width: "100%",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+    },
+    input: {
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      fontSize: "1rem",
+    },
+    addButton: {
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "1rem",
+    },
+    punishmentsList: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "1rem",
+      width: "100%",
+    },
+    emptyState: {
+      fontSize: "1rem",
+      color: "#9ca3af",
+      textAlign: "center",
+      padding: "2rem",
+    },
+    punishmentItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "1.5rem",
+      border: "1px solid #374151",
+      borderRadius: "1rem",
+      backgroundColor: "#1f2937",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)",
+    },
+    punishmentInfo: {
+      display: "flex",
+      flexDirection: "column",
+    },
+    punishmentDesc: {
+      fontWeight: "500",
+      color: "#ffffff",
+      fontSize: "1.125rem",
+    },
+    punishmentAmount: {
+      fontSize: "0.875rem",
+      color: "#9ca3af",
+      marginTop: "0.25rem",
+    },
+    removeButton: {
+      padding: "0.5rem 1rem",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+    },
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">Punishments</h2>
-      <div className="p-4 border rounded-2xl bg-white mb-4 grid md:grid-cols-3 gap-2">
-        <input className="border rounded-lg px-3 py-2" placeholder="Description (e.g., Venmo $5 to friend)" value={p} onChange={e=>setP(e.target.value)} />
-        <input className="border rounded-lg px-3 py-2" type="number" min="0" step="1" value={amount} onChange={e=>setAmount(e.target.value)} />
-        <button className="bg-gray-900 text-white rounded-lg px-3" onClick={()=>{ if(!p) return; setPunishments(prev=>[...prev,{ id:crypto.randomUUID(), desc:p, amount:parseInt(amount)||0 }]); setP(""); }}>Add</button>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Punishments</h2>
+      <div style={styles.formCard}>
+        <input 
+          style={styles.input} 
+          placeholder="Description (e.g., Venmo $5 to friend)" 
+          value={p} 
+          onChange={e=>setP(e.target.value)} 
+        />
+        <input 
+          style={styles.input} 
+          type="number" 
+          min="0" 
+          step="1" 
+          value={amount} 
+          onChange={e=>setAmount(e.target.value)} 
+        />
+        <button 
+          style={styles.addButton} 
+          onClick={()=>{ 
+            if(!p) return; 
+            setPunishments(prev=>[...prev,{ id:crypto.randomUUID(), desc:p, amount:parseInt(amount)||0 }]); 
+            setP(""); 
+          }}
+        >
+          Add
+        </button>
       </div>
-      <div className="space-y-2">
-        {punishments.length===0 && <div className="text-sm text-gray-600">No punishments yet.</div>}
+      <div style={styles.punishmentsList}>
+        {punishments.length===0 && <div style={styles.emptyState}>No punishments yet.</div>}
         {punishments.map(pu=> (
-          <div key={pu.id} className="flex items-center justify-between p-3 border rounded-xl bg-white">
-            <div>
-              <div className="font-medium">{pu.desc}</div>
-              <div className="text-xs text-gray-500">Stake: ${pu.amount}</div>
+          <div key={pu.id} style={styles.punishmentItem}>
+            <div style={styles.punishmentInfo}>
+              <div style={styles.punishmentDesc}>{pu.desc}</div>
+              <div style={styles.punishmentAmount}>Stake: ${pu.amount}</div>
             </div>
-            <button className="px-3 py-1 border rounded-lg" onClick={()=>setPunishments(prev=>prev.filter(x=>x.id!==pu.id))}>Remove</button>
+            <button 
+              style={styles.removeButton} 
+              onClick={()=>setPunishments(prev=>prev.filter(x=>x.id!==pu.id))}
+            >
+              Remove
+            </button>
           </div>
         ))}
       </div>
@@ -248,36 +883,177 @@ function PunishmentsPage({ punishments, setPunishments }) {
 
 function ProfilePage({ user, stats, friends, setFriends, onLogout }) {
   const [newFriend, setNewFriend] = useState("");
+  
+  const styles = {
+    container: {
+      maxWidth: "1000px",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "2rem",
+    },
+    title: {
+      fontSize: "2rem",
+      fontWeight: "bold",
+      marginBottom: "2rem",
+      color: "#ffffff",
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "2rem",
+      width: "100%",
+    },
+    card: {
+      padding: "1.5rem",
+      border: "1px solid #374151",
+      borderRadius: "1rem",
+      backgroundColor: "#1f2937",
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+    },
+    cardTitle: {
+      fontWeight: "600",
+      color: "#ffffff",
+      fontSize: "1.125rem",
+      marginBottom: "1rem",
+    },
+    accountInfo: {
+      fontSize: "0.875rem",
+      color: "#9ca3af",
+      marginTop: "0.5rem",
+    },
+    emailSpan: {
+      fontFamily: "monospace",
+      color: "#ffffff",
+    },
+    signOutButton: {
+      marginTop: "1rem",
+      padding: "0.5rem 1rem",
+      border: "1px solid #4b5563",
+      borderRadius: "0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontWeight: "500",
+    },
+    statsList: {
+      fontSize: "0.875rem",
+      marginTop: "0.5rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.5rem",
+      color: "#9ca3af",
+    },
+    friendsList: {
+      fontSize: "0.875rem",
+      marginTop: "1rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.75rem",
+    },
+    friendItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "0.75rem",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      backgroundColor: "#374151",
+    },
+    friendEmail: {
+      color: "#9ca3af",
+    },
+    removeButton: {
+      fontSize: "0.75rem",
+      padding: "0.25rem 0.5rem",
+      border: "1px solid #6b7280",
+      borderRadius: "0.5rem",
+      backgroundColor: "#4b5563",
+      color: "#ffffff",
+      cursor: "pointer",
+    },
+    addFriendContainer: {
+      marginTop: "1rem",
+      display: "flex",
+      gap: "0.75rem",
+    },
+    addFriendInput: {
+      flex: "1",
+      border: "1px solid #4b5563",
+      borderRadius: "0.5rem",
+      padding: "0.5rem 0.75rem",
+      backgroundColor: "#374151",
+      color: "#ffffff",
+    },
+    addFriendButton: {
+      padding: "0.5rem 0.75rem",
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: "0.5rem",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "600",
+    },
+  };
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">Profile</h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="p-4 border rounded-2xl bg-white">
-          <div className="font-semibold">Account</div>
-          <div className="text-sm text-gray-700 mt-1">Email: <span className="font-mono">{user.email}</span></div>
-          <div className="text-sm text-gray-700">Name: {user.name || "(you)"}</div>
-          <button className="mt-3 px-3 py-1.5 border rounded-xl" onClick={onLogout}>Sign out</button>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Profile</h2>
+      <div style={styles.grid}>
+        <div style={styles.card}>
+          <div style={styles.cardTitle}>Account</div>
+          <div style={styles.accountInfo}>
+            Email: <span style={styles.emailSpan}>{user.email}</span>
+          </div>
+          <div style={styles.accountInfo}>
+            Name: {user.name || "(you)"}
+          </div>
+          <button style={styles.signOutButton} onClick={onLogout}>
+            Sign out
+          </button>
         </div>
-        <div className="p-4 border rounded-2xl bg-white">
-          <div className="font-semibold">Stats</div>
-          <ul className="text-sm mt-1 space-y-1">
+        <div style={styles.card}>
+          <div style={styles.cardTitle}>Stats</div>
+          <ul style={styles.statsList}>
             <li>Bombs defused: <b>{stats.defused}</b></li>
             <li>Bombs exploded: <b>{stats.exploded}</b></li>
           </ul>
         </div>
-        <div className="p-4 border rounded-2xl bg-white">
-          <div className="font-semibold">Friends / Verifiers</div>
-          <ul className="text-sm mt-2 space-y-2">
+        <div style={styles.card}>
+          <div style={styles.cardTitle}>Friends / Verifiers</div>
+          <ul style={styles.friendsList}>
             {friends.map(f => (
-              <li key={f.email} className="flex items-center justify-between p-2 border rounded-lg">
-                <span>{f.name} <span className="text-gray-500">({f.email})</span></span>
-                <button className="text-xs px-2 py-1 border rounded-lg" onClick={()=>setFriends(prev=>prev.filter(x=>x.email!==f.email))}>Remove</button>
+              <li key={f.email} style={styles.friendItem}>
+                <span>
+                  {f.name} <span style={styles.friendEmail}>({f.email})</span>
+                </span>
+                <button 
+                  style={styles.removeButton} 
+                  onClick={()=>setFriends(prev=>prev.filter(x=>x.email!==f.email))}
+                >
+                  Remove
+                </button>
               </li>
             ))}
           </ul>
-          <div className="mt-3 flex gap-2">
-            <input className="flex-1 border rounded-lg px-3 py-2" placeholder="Add friend by email" value={newFriend} onChange={e=>setNewFriend(e.target.value)} />
-            <button className="px-3 py-2 bg-gray-900 text-white rounded-lg" onClick={()=>{ if(!newFriend) return; setFriends(prev=>[...prev,{ name:newFriend.split("@")[0], email:newFriend }]); setNewFriend(""); }}>Add</button>
+          <div style={styles.addFriendContainer}>
+            <input 
+              style={styles.addFriendInput} 
+              placeholder="Add friend by email" 
+              value={newFriend} 
+              onChange={e=>setNewFriend(e.target.value)} 
+            />
+            <button 
+              style={styles.addFriendButton} 
+              onClick={()=>{ 
+                if(!newFriend) return; 
+                setFriends(prev=>[...prev,{ name:newFriend.split("@")[0], email:newFriend }]); 
+                setNewFriend(""); 
+              }}
+            >
+              Add
+            </button>
           </div>
         </div>
       </div>
@@ -315,33 +1091,78 @@ export default function App() {
   // show nav only on pages 3–6
   const showNav = isLogged && [routes.home, routes.tasks, routes.punishments, routes.profile].includes(route);
 
+  const styles = {
+    app: {
+      minHeight: "100vh",
+      backgroundColor: "#0f0f0f",
+      color: "#ffffff",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem",
+    },
+    mainContent: {
+      width: "100%",
+      maxWidth: "1200px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "2rem",
+    },
+    footer: {
+      maxWidth: "72rem",
+      margin: "0 auto",
+      padding: "2.5rem 1rem",
+      fontSize: "0.75rem",
+      color: "#9ca3af",
+    },
+    footerContent: {
+      borderTop: "1px solid #374151",
+      paddingTop: "1.5rem",
+    },
+    footerTitle: {
+      fontWeight: "600",
+      marginBottom: "0.5rem",
+    },
+    footerList: {
+      listStyleType: "disc",
+      paddingLeft: "1.25rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.25rem",
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      {showNav && <AppNav nav={nav} route={route} />}
+    <div style={styles.app}>
+      <div style={styles.mainContent}>
+        {showNav && <AppNav nav={nav} route={route} />}
 
-      {/* ROUTES */}
-      {route===routes.login && <LoginPage nav={nav} onLogin={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
-      {route===routes.signup && <SignupPage nav={nav} onSignup={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
-      {isLogged && route===routes.home && <HomeBombPage bomb={bomb} setBomb={setBomb} nav={nav} />}
-      {isLogged && route===routes.tasks && <TasksPage tasks={tasks} setTasks={setTasks} />}
-      {isLogged && route===routes.punishments && <PunishmentsPage punishments={punishments} setPunishments={setPunishments} />}
-      {isLogged && route===routes.profile && (
-        <ProfilePage user={user} stats={stats} friends={friends} setFriends={setFriends} onLogout={()=>setIsLogged(false)} />
-      )}
+        {/* ROUTES */}
+        {route===routes.login && <LoginPage nav={nav} onLogin={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
+        {route===routes.signup && <SignupPage nav={nav} onSignup={(u)=>{ setUser(prev=>({...prev, ...u})); setIsLogged(true); }} />}
+        {isLogged && route===routes.home && <HomeBombPage bomb={bomb} setBomb={setBomb} nav={nav} />}
+        {isLogged && route===routes.tasks && <TasksPage tasks={tasks} setTasks={setTasks} />}
+        {isLogged && route===routes.punishments && <PunishmentsPage punishments={punishments} setPunishments={setPunishments} />}
+        {isLogged && route===routes.profile && (
+          <ProfilePage user={user} stats={stats} friends={friends} setFriends={setFriends} onLogout={()=>setIsLogged(false)} />
+        )}
 
-      {/* footer */}
-      <footer className="max-w-6xl mx-auto px-4 py-10 text-xs text-gray-500">
-        <div className="border-t pt-6">
-          <div className="font-semibold mb-2">Next steps</div>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Replace mock auth with Firebase/Supabase; protect routes on server too.</li>
-            <li>Send email invites to verifiers; verification dashboard w/ Approve/Reject.</li>
-            <li>Server‑enforced timers (Cloud Functions / cron) to trigger punishments.</li>
-            <li>Stripe SetupIntent to hold penalty; capture on failure; add non‑monetary options.</li>
-            <li>Persist tasks, punishments, friendships in database; attach to bombs.</li>
-          </ul>
-        </div>
-      </footer>
+        {/* footer */}
+        <footer style={styles.footer}>
+          <div style={styles.footerContent}>
+            <div style={styles.footerTitle}>Next steps</div>
+            <ul style={styles.footerList}>
+              <li>Replace mock auth with Firebase/Supabase; protect routes on server too.</li>
+              <li>Send email invites to verifiers; verification dashboard w/ Approve/Reject.</li>
+              <li>Server‑enforced timers (Cloud Functions / cron) to trigger punishments.</li>
+              <li>Stripe SetupIntent to hold penalty; capture on failure; add non‑monetary options.</li>
+              <li>Persist tasks, punishments, friendships in database; attach to bombs.</li>
+            </ul>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
