@@ -101,9 +101,13 @@ function AppNav({ nav, route }) {
   return (
     <div style={styles.container}>
       {/* Huge centered title */}
-      <h1 style={styles.title}>
-        To-Do Or Die.
-      </h1>
+      <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+        <img 
+          src="/logo-text.svg" 
+          alt="TO-DO or DESTROY" 
+          style={{ maxWidth: "400px", height: "auto" }}
+        />
+      </div>
 
       {/* Nav buttons aligned right */}
       <div style={styles.navContainer}>
@@ -124,109 +128,127 @@ function AppNav({ nav, route }) {
 
 // ---------- Pages ----------
 function LoginPage({ nav, onLogin }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    
+    const styles = {
+      container: {
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "1.5rem",
+        flexDirection: "column",
+      },
+      card: {
+        width: "100%",
+        maxWidth: "32rem",
+        padding: "2rem",
+        borderRadius: "1rem",
+        border: "1px solid #374151",
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+        backgroundColor: "#1f2937",
+        flexDirection: "column",
+      },
+      title: {
+        fontSize: "1.5rem",
+        fontWeight: "bold",
+        marginBottom: "1.5rem",
+        textAlign: "center",
+        color: "#ffffff",
+      },
+      formContainer: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: "0.75rem",
+      },
+      input: {
+        width: "100%",
+        border: "1px solid #4b5563",
+        borderRadius: "0.5rem",
+        padding: "0.75rem",
+        backgroundColor: "#374151",
+        color: "#ffffff",
+        fontSize: "1rem",
+      },
+      button: {
+        width: "100%",
+        backgroundColor: "#ffffff",
+        color: "#000000",
+        borderRadius: "0.5rem",
+        padding: "0.75rem 0",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "600",
+        fontSize: "1rem",
+        flexDirection: "column",
+        justifyContent: "center",
+      },
+      linkContainer: {
+        fontSize: "0.875rem",
+        textAlign: "center",
+        color: "#9ca3af",
+        flexDirection: "column",
+        justifyContent: "center",
+      },
+      link: {
+        textDecoration: "underline",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        color: "#ffffff",
+        flexDirection: "column",
+        justifyContent: "center",
+      },
+    };
   
-  const styles = {
-    container: {
-      width: "100%",
-      display: "flex",
-      justifyContent: "center",
-      padding: "1.5rem",
-    },
-    card: {
-      width: "100%",
-      maxWidth: "32rem",
-      padding: "2rem",
-      borderRadius: "1rem",
-      border: "1px solid #374151",
-      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
-      backgroundColor: "#1f2937",
-    },
-    title: {
-      fontSize: "1.5rem",
-      fontWeight: "bold",
-      marginBottom: "1.5rem",
-      textAlign: "center",
-      color: "#ffffff",
-    },
-    formContainer: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.75rem",
-    },
-    input: {
-      width: "100%",
-      border: "1px solid #4b5563",
-      borderRadius: "0.5rem",
-      padding: "0.75rem",
-      backgroundColor: "#374151",
-      color: "#ffffff",
-      fontSize: "1rem",
-    },
-    button: {
-      width: "100%",
-      backgroundColor: "#ffffff",
-      color: "#000000",
-      borderRadius: "0.5rem",
-      padding: "0.75rem 0",
-      border: "none",
-      cursor: "pointer",
-      fontWeight: "600",
-      fontSize: "1rem",
-    },
-    linkContainer: {
-      fontSize: "0.875rem",
-      textAlign: "center",
-      color: "#9ca3af",
-    },
-    link: {
-      textDecoration: "underline",
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      color: "#ffffff",
-    },
-  };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Login Or Die.</h1>
-        <div style={styles.formContainer}>
-          <input 
-            style={styles.input} 
-            placeholder="email" 
-            value={email} 
-            onChange={e=>setEmail(e.target.value)} 
-          />
-          <input 
-            style={styles.input} 
-            placeholder="password" 
-            type="password" 
-            value={password} 
-            onChange={e=>setPassword(e.target.value)} 
-          />
-          <button 
-            style={styles.button} 
-            onClick={() => onLogin({ email })}
-          >
-            Sign in (mock)
-          </button>
-          <div style={styles.linkContainer}>
-            Don't have an account? 
-            <button 
-              style={styles.link} 
-              onClick={()=>nav(routes.signup)}
-            >
-              Sign up
-            </button>
+    return (
+        <div style={styles.container}>
+          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+            <img 
+              src="/logo-full.svg" 
+              alt="TO-DO or DESTROY" 
+              style={{ maxWidth: "300px", height: "auto" }}
+            />
+          </div>
+          <div style={styles.card}>
+            <h1 style={styles.title}>Login Or Die.</h1>
+            <div style={styles.formContainer}>
+              <input 
+                style={styles.input} 
+                placeholder="email" 
+                value={email} 
+                onChange={e=>setEmail(e.target.value)} 
+              />
+              <input 
+                style={styles.input} 
+                placeholder="password" 
+                type="password" 
+                value={password} 
+                onChange={e=>setPassword(e.target.value)} 
+              />
+              <button 
+                style={styles.button} 
+                onClick={() => onLogin({ email })}
+              >
+                Sign in (mock)
+              </button>
+              <div style={styles.linkContainer}>
+                Don't have an account? 
+                <button 
+                  style={styles.link} 
+                  onClick={()=>nav(routes.signup)}
+                >
+                  Sign up
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      );
+    }
 
 function SignupPage({ nav, onSignup }) {
   const [email, setEmail] = useState("");
@@ -238,7 +260,9 @@ function SignupPage({ nav, onSignup }) {
       width: "100%",
       display: "flex",
       justifyContent: "center",
+      alignItems: "center",
       padding: "1.5rem",
+      flexDirection: "column",
     },
     card: {
       width: "100%",
@@ -248,6 +272,7 @@ function SignupPage({ nav, onSignup }) {
       border: "1px solid #374151",
       boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
       backgroundColor: "#1f2937",
+      flexDirection: "column",
     },
     title: {
       fontSize: "1.5rem",
@@ -259,6 +284,7 @@ function SignupPage({ nav, onSignup }) {
     formContainer: {
       display: "flex",
       flexDirection: "column",
+      justifyContent: "center",
       gap: "0.75rem",
     },
     input: {
@@ -280,11 +306,15 @@ function SignupPage({ nav, onSignup }) {
       cursor: "pointer",
       fontWeight: "600",
       fontSize: "1rem",
+      flexDirection: "column",
+      justifyContent: "center",
     },
     linkContainer: {
       fontSize: "0.875rem",
       textAlign: "center",
       color: "#9ca3af",
+      flexDirection: "column",
+      justifyContent: "center",
     },
     link: {
       textDecoration: "underline",
@@ -292,11 +322,20 @@ function SignupPage({ nav, onSignup }) {
       border: "none",
       cursor: "pointer",
       color: "#ffffff",
+      flexDirection: "column",
+      justifyContent: "center",
     },
   };
 
   return (
     <div style={styles.container}>
+    <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <img 
+          src="/logo-full.svg" 
+          alt="TO-DO or DESTROY" 
+          style={{ maxWidth: "300px", height: "auto" }}
+        />
+      </div>
       <div style={styles.card}>
         <h1 style={styles.title}>Create Account</h1>
         <div style={styles.formContainer}>
