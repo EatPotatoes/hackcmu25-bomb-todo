@@ -61,15 +61,10 @@ function AppNav({ nav, route }) {
       borderRadius: "1rem",
       marginBottom: "2rem",
       width: "100%",
-      maxWidth: "800px",
     },
     profileContainer: {
       display: "flex",
       justifyContent: "flex-start",
-    },
-    profileIcon: {
-      fontSize: "2rem",
-      color: "#ffffff",
     },
     title: {
       fontSize: "4rem",
@@ -105,11 +100,6 @@ function AppNav({ nav, route }) {
 
   return (
     <div style={styles.container}>
-      {/* Profile icon top-left */}
-      <div style={styles.profileContainer}>
-        <span style={styles.profileIcon}>👤</span>
-      </div>
-
       {/* Huge centered title */}
       <h1 style={styles.title}>
         To-Do Or Die.
@@ -142,12 +132,11 @@ function LoginPage({ nav, onLogin }) {
       width: "100%",
       display: "flex",
       justifyContent: "center",
-      alignItems: "center",
       padding: "1.5rem",
     },
     card: {
       width: "100%",
-      maxWidth: "28rem",
+      maxWidth: "32rem",
       padding: "2rem",
       borderRadius: "1rem",
       border: "1px solid #374151",
@@ -249,12 +238,11 @@ function SignupPage({ nav, onSignup }) {
       width: "100%",
       display: "flex",
       justifyContent: "center",
-      alignItems: "center",
       padding: "1.5rem",
     },
     card: {
       width: "100%",
-      maxWidth: "28rem",
+      maxWidth: "32rem",
       padding: "2rem",
       borderRadius: "1rem",
       border: "1px solid #374151",
@@ -359,10 +347,8 @@ function HomeBombPage({ bomb, setBomb, nav }) {
   const styles = {
     container: {
       width: "100%",
-      maxWidth: "1000px",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       padding: "2rem",
     },
     grid: {
@@ -572,11 +558,9 @@ function TasksPage({ tasks, setTasks }) {
   
   const styles = {
     container: {
-      maxWidth: "800px",
       width: "100%",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       padding: "2rem",
     },
     title: {
@@ -741,11 +725,9 @@ function PunishmentsPage({ punishments, setPunishments }) {
   
   const styles = {
     container: {
-      maxWidth: "800px",
       width: "100%",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       padding: "2rem",
     },
     title: {
@@ -886,11 +868,9 @@ function ProfilePage({ user, stats, friends, setFriends, onLogout }) {
   
   const styles = {
     container: {
-      maxWidth: "1000px",
       width: "100%",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       padding: "2rem",
     },
     title: {
@@ -1094,21 +1074,20 @@ export default function App() {
   const styles = {
     app: {
       minHeight: "100vh",
+      width: "100vw",
       backgroundColor: "#0f0f0f",
       color: "#ffffff",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2rem",
+      margin: 0,
+      padding: 0,
     },
     mainContent: {
       width: "100%",
-      maxWidth: "1200px",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       gap: "2rem",
+      padding: "2rem",
     },
     footer: {
       maxWidth: "72rem",
