@@ -1,4 +1,4 @@
-# To-Do or Die.
+# To-Do or Destroy
 
 ## How to First Time Set-up Demo
 - Download hack_Bomb.jsx file
